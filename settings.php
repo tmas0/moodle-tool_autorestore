@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Settings for automatic restore tool.
  *
  * @package		tool_autorestore
  * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
@@ -22,10 +23,11 @@
  * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   	= 2015033000;        // The current plugin version.
-$plugin->requires  	= 2014051200;        // Requires this Moodle version.
-$plugin->cron 		= 0;
-$plugin->release 	= 'Version 1.0';
-$plugin->component 	= 'tool_autorestore'; // Full name of the plugin (used for diagnostics).
+if ($hassiteconfig) {
+    // Needs this condition or there is error on login page.
+    $ADMIN->add('root', new admin_externalpage('autorestore',
+            get_string('pluginname', 'tool_autorestore'),
+            new moodle_url('/admin/tool/autorestore/index.php')));
+}
