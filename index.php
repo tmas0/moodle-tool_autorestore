@@ -39,7 +39,7 @@ $PAGE->set_title($sitename);
 $PAGE->set_heading($sitename);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading('Automated restore');
+echo $OUTPUT->heading(get_string('pluginname', 'tool_autorestore'));
 
 echo "HELLO WORLD!!!";
 
