@@ -22,3 +22,25 @@
  * @author     	Toni Mas, Ricardo Díaz
  * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
+require_once(__DIR__ . '/../../../config.php');
+
+
+// Always build the page in site context.
+$context = context_system::instance();
+$sitename = format_string($SITE->fullname, true, array('context' => $context));
+$PAGE->set_context($context);
+
+// Set up the page.
+$indexurl = new moodle_url('/admin/tool/autorestore/index.php');
+$PAGE->set_url($indexurl);
+$PAGE->set_pagelayout('report');
+$PAGE->set_title($sitename);
+$PAGE->set_heading($sitename);
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading('Automated restore');
+
+echo "HELLO WORLD!!!";
+
+echo $OUTPUT->footer();
