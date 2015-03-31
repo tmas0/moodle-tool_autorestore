@@ -17,7 +17,7 @@
 /**
  * Settings for automatic restore tool.
  *
- * @package		tool_autorestore
+ * @package     tool_autorestore
  * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
  * @author     	Toni Mas, Ricardo Díaz
  * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
     // Needs this condition or there is error on login page.
-    $ADMIN->add('root', new admin_externalpage('autorestore',
+    $ADMIN->add('courses', new admin_externalpage('autorestore',
             get_string('pluginname', 'tool_autorestore'),
             new moodle_url('/admin/tool/autorestore/index.php')));
 }
