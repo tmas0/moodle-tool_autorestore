@@ -29,5 +29,5 @@ if ($hassiteconfig) {
     // Needs this condition or there is error on login page.
     $ADMIN->add('courses', new admin_externalpage('autorestore',
             get_string('pluginname', 'tool_autorestore'),
-            new moodle_url('/admin/tool/autorestore/index.php')));
+            new moodle_url('/admin/tool/autorestore/index.php', 'moodle/site:config')));
 }
