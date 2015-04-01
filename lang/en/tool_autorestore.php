@@ -19,17 +19,30 @@
  *
  * @package   tool_autorestore
  * @copyright  2015 Universitat de les Illes Balears http://www.uib.es
- * @author     Toni Mas, Ricardo Díaz
+ * @authors     Toni Mas, Ricardo Díaz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['aftersaving...'] = 'Once you have saved your settings, you may wish to';
+$string['doitnow'] = 'perform an massive restore right now';
 $string['pluginname'] = 'Automated restore';
 $string['autorestorecrontask'] = 'automatedrestore';
 $string['restore'] = 'Restore';
 $string['restoredcourses'] = 'Restored courses';
 $string['pluginname_desc'] = 'Description';
-$string['basicsettings'] = 'Description';
-$string['location'] = 'Files location';
+
+//Settings
+$string['basicsettings'] = 'Basic settings';
+$string['active'] = 'active';
+$string['autoactivedescription'] = 'Description autoactive...';//TODO
+$string['autoactivedisabled'] = 'Disabled';
+$string['autoactiveenabled'] = 'Enabled';
+$string['autoactivemanual'] = 'Manual';
+$string['forceexecution'] = 'Force autorestore execution';
+$string['forceexecution_desc'] = 'Autorestore will run the next time you run cron.';
+$string['backups'] = 'Backups files location';
+$string['restored'] = 'Restored files location';
+$string['norestored'] = 'No restored files location';
 $string['logtolocation'] = 'Log file output location (blank for no logging)';
 $string['mailadmins'] = 'Notify admin by email';
+$string['mailsubject'] = 'Subject for email notification';
