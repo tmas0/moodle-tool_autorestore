@@ -33,4 +33,11 @@ $capabilities = array(
             'manager' => CAP_ALLOW,
         )
     ),
+    'tool/autorestore:view' => array(
+        'captype' => 'view',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW,
+        )
+    ),
 );

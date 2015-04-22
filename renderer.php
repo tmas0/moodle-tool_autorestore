@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Settings for automatic restore tool.
+ * Renderer for automatic restore tool.
  *
  * @package     tool_autorestore
  * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
@@ -23,12 +23,15 @@
  * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-if ($hassiteconfig) {
-    // Needs this condition or there is error on login page.
-    $ADMIN->add('courses', new admin_externalpage('toolautorestore',
-            get_string('pluginname', 'tool_autorestore'),
-            $CFG->wwwroot.'/'.$CFG->admin.'/tool/autorestore/index.php',
-            'tool/autorestore:config'));
+/**
+ * Renderer for the automatic restore tool.
+ *
+ * @package    tool_autorestore
+ * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
+ * @author     	Toni Mas, Ricardo Díaz
+ * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class tool_autorestore_renderer extends plugin_renderer_base {
 }

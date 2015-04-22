@@ -23,24 +23,39 @@
  * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
  
-require_once(__DIR__ . '/../../../config.php');
+require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
+require_once($CFG->libdir.'/adminlib.php');
 
+// Security hack.
+require_login();
 
-// Always build the page in site context.
+admin_externalpage_setup('toolautorestore');
+
+// Get context.
 $context = context_system::instance();
-$sitename = format_string($SITE->fullname, true, array('context' => $context));
+
+// Restrict view.
+require_capability('tool/autorestore:view', $context);
+
+$strplugin = get_string('pluginname', 'tool_autorestore');
+$title = format_string($SITE->fullname) . ': '. $strplugin;
+
+
 $PAGE->set_context($context);
 
 // Set up the page.
 $indexurl = new moodle_url('/admin/tool/autorestore/index.php');
 $PAGE->set_url($indexurl);
 $PAGE->set_pagelayout('report');
-$PAGE->set_title($sitename);
+$PAGE->set_title($title);
 $PAGE->set_heading($sitename);
 
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('pluginname', 'tool_autorestore'));
+// Get renderer.
+$renderer = $PAGE->get_renderer('tool_autorestore');
+
+echo $renderer->header();
+echo $renderer->heading($strplugin);
 
 echo "HELLO WORLD!!!";
 
-echo $OUTPUT->footer();
+echo $renderer->footer();

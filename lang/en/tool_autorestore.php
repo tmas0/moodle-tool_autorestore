@@ -30,6 +30,8 @@ $string['autorestorecrontask'] = 'automatedrestore';
 $string['restore'] = 'Restore';
 $string['restoredcourses'] = 'Restored courses';
 $string['pluginname_desc'] = 'Description';
+$string['autorestore:config'] = 'Allow to configure the autorestore tool';
+$string['autorestore:view'] = 'Allow to view all things from tool';
 
 //Settings
 $string['basicsettings'] = 'Basic settings';
