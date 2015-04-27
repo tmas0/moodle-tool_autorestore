@@ -32,6 +32,9 @@ $string['restoredcourses'] = 'Restored courses';
 $string['pluginname_desc'] = 'Description';
 $string['autorestore:config'] = 'Allow to configure the autorestore tool';
 $string['autorestore:view'] = 'Allow to view all things from tool';
+$string['setautorestoreparameters'] = 'Set autorestore parameters';
+$string['backupsdirectory'] = 'Select your backups directory';
+$string['restores'] = 'Restores';
 
 //Settings
 $string['basicsettings'] = 'Basic settings';

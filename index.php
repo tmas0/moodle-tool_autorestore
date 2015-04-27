@@ -25,6 +25,7 @@
  
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once('restore_form.php');
 
 // Security hack.
 require_login();
@@ -48,7 +49,7 @@ $indexurl = new moodle_url('/admin/tool/autorestore/index.php');
 $PAGE->set_url($indexurl);
 $PAGE->set_pagelayout('report');
 $PAGE->set_title($title);
-$PAGE->set_heading($sitename);
+$PAGE->set_heading(format_string($SITE->fullname));
 
 // Get renderer.
 $renderer = $PAGE->get_renderer('tool_autorestore');
@@ -56,6 +57,8 @@ $renderer = $PAGE->get_renderer('tool_autorestore');
 echo $renderer->header();
 echo $renderer->heading($strplugin);
 
-echo "HELLO WORLD!!!";
+$rform = new restore_form('index.php');
+
+$rform->display();
 
 echo $renderer->footer();

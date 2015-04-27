@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Settings for automatic restore tool.
+ * Restore config form.
  *
  * @package     tool_autorestore
  * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
@@ -25,13 +25,27 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-if ($hassiteconfig) {
-	// Add category for restore.
-	$ADMIN->add('courses', new admin_category('restores', new lang_string('restores', 'tool_autorestore')));
+require_once($CFG->libdir.'/formslib.php');
 
-    // Needs this condition or there is error on login page.
-    $ADMIN->add('restores', new admin_externalpage('toolautorestore',
-            get_string('pluginname', 'tool_autorestore'),
-            $CFG->wwwroot.'/'.$CFG->admin.'/tool/autorestore/index.php',
-            'tool/autorestore:config'));
+/**
+ * Restore form.
+ *
+ * @package     tool_autorestore
+ * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
+ * @author     	Toni Mas, Ricardo Díaz
+ * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class restore_form extends moodleform {
+
+	/**
+	 * Definition of form.
+	 */
+	protected function definition() {
+
+		$mform = $this->_form;
+		$hiddendata = $this->_customdata;
+
+		$mform->addElement('header', 'set_autorestore_parameters', get_string('setautorestoreparameters', 'tool_autorestore'));
+		
+	}
 }
