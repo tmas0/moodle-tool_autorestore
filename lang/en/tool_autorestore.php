@@ -35,6 +35,9 @@ $string['autorestore:view'] = 'Allow to view all things from tool';
 $string['setautorestoreparameters'] = 'Set autorestore parameters';
 $string['backupsdirectory'] = 'Select your backups directory';
 $string['restores'] = 'Restores';
+$string['generalautorestoredefaults'] = 'Autorestores general default settings';
+$string['restorefrom'] = 'Get backups from';
+$string['autorestorefromhelp'] = 'Choose your backup directory for auto restore this courses';
 
 //Settings
 $string['basicsettings'] = 'Basic settings';

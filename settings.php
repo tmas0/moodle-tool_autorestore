@@ -29,6 +29,13 @@ if ($hassiteconfig) {
 	// Add category for restore.
 	$ADMIN->add('courses', new admin_category('restores', new lang_string('restores', 'tool_autorestore')));
 
+	// Create a page for autorestore general tool configuration and defaults.
+    $temp = new admin_settingpage('autorestoregeneralsettings', new lang_string('generalautorestoredefaults', 'tool_autorestore'), 'moodle/restore:restorecourse');
+
+    $temp->add(new admin_setting_configdirectory('restore/autorestore_destination', new lang_string('restorefrom', 'tool_autorestore'), new lang_string('autorestorefromhelp', 'tool_autorestore'), ''));
+
+    $ADMIN->add('restores', $temp);
+
     // Needs this condition or there is error on login page.
     $ADMIN->add('restores', new admin_externalpage('toolautorestore',
             get_string('pluginname', 'tool_autorestore'),
