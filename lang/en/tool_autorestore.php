@@ -35,7 +35,6 @@ $string['autorestore:view'] = 'Allow to view all things from tool';
 $string['setautorestoreparameters'] = 'Set autorestore parameters';
 $string['backupsdirectory'] = 'Select your backups directory';
 $string['restores'] = 'Restores';
-$string['generalautorestoredefaults'] = 'Autorestores general default settings';
 $string['restorefrom'] = 'Get backups from';
 $string['autorestorefromhelp'] = 'Choose your backup directory for auto restore this courses';
 
@@ -54,3 +53,33 @@ $string['norestored'] = 'No restored files location';
 $string['logtolocation'] = 'Log file output location (blank for no logging)';
 $string['mailadmins'] = 'Notify admin by email';
 $string['mailsubject'] = 'Subject for email notification';
+
+//General restore defaults section
+$string['generalautorestoredefaults'] = 'Autorestores general defaults';
+
+// General restore settings section.
+$string['generalsettings'] = 'General restore settings';
+$string['generalusers'] = 'Include users';
+$string['configgeneralusers'] = 'Sets the default for whether to include users in restores.';
+$string['generalanonymize'] = 'Anonymise information';
+$string['configgeneralanonymize'] = 'If enabled all information pertaining to users will be anonymised by default.';
+$string['generalroleassignments'] = 'Include role assignments';
+$string['configgeneralroleassignments'] = 'If enabled by default roles assignments will also be backed up.';
+$string['generalactivities'] = 'Include activities and resources';
+$string['configgeneralactivities'] = 'Sets the default for including activities in restore.';
+$string['generalblocks'] = 'Include blocks';
+$string['configgeneralblocks'] = 'Sets the default for including blocks in a restore.';
+$string['generalfilters'] = 'Include filters';
+$string['configgeneralfilters'] = 'Sets the default for including filters in a restore.';
+$string['generalcomments'] = 'Include comments';
+$string['configgeneralcomments'] = 'Sets the default for including comments in a restore.';
+$string['generalbadges'] = 'Include badges';
+$string['configgeneralbadges'] = 'Sets the default for including badges in a restore.';
+$string['generaluserscompletion'] = 'Include user completion information';
+$string['configgeneraluserscompletion'] = 'If enabled user completion information will be included in restores by default.';
+$string['generallogs'] = 'Include logs';
+$string['configgenerallogs'] = 'If enabled logs will be included in restores by default.';
+$string['generalhistories'] = 'Include histories';
+$string['configgeneralhistories'] = 'Sets the default for including user history within a restore.';
+$string['generalquestionbank'] = 'Include question bank';
+$string['configgeneralquestionbank'] = 'If enabled the question bank will be included in restores by default. PLEASE NOTE: Disabling this setting will disable the restore of activities which use the question bank, such as the quiz.';
