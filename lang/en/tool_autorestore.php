@@ -56,6 +56,13 @@ $string['mailsubject'] = 'Subject for email notification';
 
 //General restore defaults section
 $string['generalautorestoredefaults'] = 'Autorestores general defaults';
+$string['restorefrom'] = 'Get backups from';
+$string['autorestorefromhelp'] = 'Choose your backup directory for auto restore courses';
+$string['restoreto'] = 'Move restored courses to';
+$string['autorestoretohelp'] = 'Choose your directory to move restored courses';
+$string['mailadmins'] = 'Notify admins by email';
+$string['mailsubject'] = 'Subject for email notifications';
+$string['maildefaultsubject'] = 'Moodle autorestore plugin notification';
 
 // General restore settings section.
 $string['generalsettings'] = 'General restore settings';
