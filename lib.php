@@ -22,3 +22,30 @@
  * @author     	Toni Mas, Ricardo Díaz
  * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+class admin_setting_special_autorestoredays extends admin_setting_configmulticheckbox2 {
+    /**
+     * Calls parent::__construct with specific arguments
+     */
+    public function __construct() {
+        parent::__construct('autorestore_weekdays', get_string('automatedrestoreschedule','tool_autorestore'), get_string('automatedrestoreschedulehelp','tool_autorestore'), array(), NULL);
+        $this->plugin = 'tool_autorestore';
+    }
+
+    /**
+     * Load the available choices for the select box
+     *
+     * @return bool Always returns true
+     */
+    public function load_choices() {
+        if (is_array($this->choices)) {
+            return true;
+        }
+        $this->choices = array();
+        $days = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
+        foreach ($days as $day) {
+            $this->choices[$day] = get_string($day, 'calendar');
+        }
+        return true;
+    }
+}
