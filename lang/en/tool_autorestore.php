@@ -39,7 +39,6 @@ $string['forceexecution_desc'] = 'Autorestore will run the next time you run cro
 $string['backups'] = 'Backups files location';
 $string['restored'] = 'Restored files location';
 $string['norestored'] = 'No restored files location';
-$string['logtolocation'] = 'Log file output location (blank for no logging)';
 
 /*************************
  strings utilizados:
@@ -49,6 +48,8 @@ $string['setautorestoreparameters'] = 'Set autorestore parameters'; //restore_fo
 $string['pluginname'] = 'Automated restore'; //restorenow.php,
 $string['restore'] = 'Restore'; //restorenow.php,
 $string['messageprovider:autorestore'] = 'Autorestore plugin notifications'; //messages.php
+$string['automatedrestoreschedule'] = 'Schedule'; //lib.php
+$string['automatedrestoreschedulehelp'] = 'Choose which days of the week to perform automated restores.'; //lib.php
 
 //settings.php
 //General restore defaults section
