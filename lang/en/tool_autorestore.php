@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'local_automatedrestore', language 'en'.
+ * Strings for component 'tool_autorestore', language 'en'.
  *
  * @package   tool_autorestore
  * @copyright  2015 Universitat de les Illes Balears http://www.uib.es
@@ -25,44 +25,52 @@
 
 $string['aftersaving...'] = 'Once you have saved your settings, you may wish to';
 $string['doitnow'] = 'perform an massive restore right now';
-$string['pluginname'] = 'Automated restore';
-$string['autorestorecrontask'] = 'automatedrestore';
-$string['restore'] = 'Restore';
 $string['restoredcourses'] = 'Restored courses';
 $string['pluginname_desc'] = 'Description';
 $string['autorestore:config'] = 'Allow to configure the autorestore tool';
 $string['autorestore:view'] = 'Allow to view all things from tool';
-$string['setautorestoreparameters'] = 'Set autorestore parameters';
 $string['backupsdirectory'] = 'Select your backups directory';
-$string['restores'] = 'Restores';
-$string['restorefrom'] = 'Get backups from';
-$string['autorestorefromhelp'] = 'Choose your backup directory for auto restore this courses';
+
 
 //Settings
 $string['basicsettings'] = 'Basic settings';
-$string['active'] = 'active';
-$string['autoactivedescription'] = 'Description autoactive...';//TODO
-$string['autoactivedisabled'] = 'Disabled';
-$string['autoactiveenabled'] = 'Enabled';
-$string['autoactivemanual'] = 'Manual';
 $string['forceexecution'] = 'Force autorestore execution';
 $string['forceexecution_desc'] = 'Autorestore will run the next time you run cron.';
 $string['backups'] = 'Backups files location';
 $string['restored'] = 'Restored files location';
 $string['norestored'] = 'No restored files location';
 $string['logtolocation'] = 'Log file output location (blank for no logging)';
-$string['mailadmins'] = 'Notify admin by email';
-$string['mailsubject'] = 'Subject for email notification';
 
+/*************************
+ strings utilizados:
+*************************/
+$string['autorestorecrontask'] = 'Automated restores'; //cron_task.php
+$string['setautorestoreparameters'] = 'Set autorestore parameters'; //restore_form.php,
+$string['pluginname'] = 'Automated restore'; //restorenow.php,
+$string['restore'] = 'Restore'; //restorenow.php,
+$string['messageprovider:autorestore'] = 'Autorestore plugin notifications'; //messages.php
+
+//settings.php
 //General restore defaults section
+$string['restores'] = 'Restores';
+
+$string['active'] = 'Active';
+$string['autoactivedisabled'] = 'Disabled';
+$string['autoactiveenabled'] = 'Enabled';
+$string['autoactivemanual'] = 'Manual';
+$string['autoactivedescription'] = 'Choose whether or not to do automated restores. If manual is selected automated restores will be possible only by through the automated restore CLI script. This can be done either manually on the command line or through cron.';
+$string['executeat'] = 'Execute at';
+$string['autorestoreexecuteathelp'] = 'Choose what time automated restores should run at.';
 $string['generalautorestoredefaults'] = 'Autorestores general defaults';
 $string['restorefrom'] = 'Get backups from';
 $string['autorestorefromhelp'] = 'Choose your backup directory for auto restore courses';
 $string['restoreto'] = 'Move restored courses to';
 $string['autorestoretohelp'] = 'Choose your directory to move restored courses';
+$string['logtolocation'] = 'Log file output location (blank for no logging)';
 $string['mailadmins'] = 'Notify admins by email';
 $string['mailsubject'] = 'Subject for email notifications';
 $string['maildefaultsubject'] = 'Moodle autorestore plugin notification';
+
 
 // General restore settings section.
 $string['generalsettings'] = 'General restore settings';
@@ -71,7 +79,7 @@ $string['configgeneralusers'] = 'Sets the default for whether to include users i
 $string['generalanonymize'] = 'Anonymise information';
 $string['configgeneralanonymize'] = 'If enabled all information pertaining to users will be anonymised by default.';
 $string['generalroleassignments'] = 'Include role assignments';
-$string['configgeneralroleassignments'] = 'If enabled by default roles assignments will also be backed up.';
+$string['configgeneralroleassignments'] = 'If enabled by default roles assignments will also be restored.';
 $string['generalactivities'] = 'Include activities and resources';
 $string['configgeneralactivities'] = 'Sets the default for including activities in restore.';
 $string['generalblocks'] = 'Include blocks';
