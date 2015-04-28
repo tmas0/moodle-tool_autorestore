@@ -34,7 +34,10 @@ if ($hassiteconfig) {
     //General restore defaults section
     $temp = new admin_settingpage('autorestoregeneralsettings', new lang_string('generalautorestoredefaults', 'tool_autorestore'), 'moodle/restore:restorecourse');
     $temp->add(new admin_setting_configdirectory('tool_autorestore/destination', new lang_string('restorefrom', 'tool_autorestore'), new lang_string('autorestorefromhelp', 'tool_autorestore'), ''));
-
+    $temp->add(new admin_setting_configdirectory('tool_autorestore/destination', new lang_string('restoreto', 'tool_autorestore'), new lang_string('autorestoretohelp', 'tool_autorestore'), ''));
+    $temp->add(new admin_setting_configcheckbox('tool_autorestore/mailadmins', new lang_string('mailadmins', 'tool_autorestore'), '', '', 0));
+    $temp->add(new admin_setting_configtext('tool_autorestore/mailsubject', new lang_string('mailsubject', 'tool_autorestore'), '', new lang_string('maildefaultsubject', 'tool_autorestore')));
+    
     // General restore settings section
     $temp->add(new admin_setting_heading('generalsettings', new lang_string('generalsettings', 'tool_autorestore'), ''));
     $temp->add(new admin_setting_configcheckbox_with_lock('tool_autorestore/autorestore_general_users', new lang_string('generalusers','tool_autorestore'), new lang_string('configgeneralusers','tool_autorestore'), array('value'=>1, 'locked'=>0)));
