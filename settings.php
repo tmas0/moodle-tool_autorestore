@@ -46,7 +46,7 @@ if ($hassiteconfig) {
     $temp->add(new admin_setting_configdirectory('tool_autorestore/from', new lang_string('restorefrom', 'tool_autorestore'), new lang_string('autorestorefromhelp', 'tool_autorestore'), ''));
     $temp->add(new admin_setting_configdirectory('tool_autorestore/destination', new lang_string('restoreto', 'tool_autorestore'), new lang_string('autorestoretohelp', 'tool_autorestore'), ''));
     $temp->add(new admin_setting_configtext('tool_autorestore/logtolocation', new lang_string('logtolocation', 'tool_autorestore'), '', ''));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/mailadmins', new lang_string('mailadmins', 'tool_autorestore'), '', '', 0));
+    $temp->add(new admin_setting_configcheckbox('tool_autorestore/mailadmins', new lang_string('mailadmins', 'tool_autorestore'), '', 0));
     $temp->add(new admin_setting_configtext('tool_autorestore/mailsubject', new lang_string('mailsubject', 'tool_autorestore'), '', new lang_string('maildefaultsubject', 'tool_autorestore')));
 
     // General restore settings section
