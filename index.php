@@ -57,8 +57,22 @@ $renderer = $PAGE->get_renderer('tool_autorestore');
 echo $renderer->header();
 echo $renderer->heading($strplugin);
 
-$rform = new restore_form('index.php');
+// Get config parameter.
+$enabled = get_config('tool_autorestore', 'active');
 
-$rform->display();
+if ( $enabled == 0 ) {
+	echo $renderer->box(get_string('disabled', 'tool_autorestore'));
+} else {
+
+	// List of pending backups.
+	$backupsdir = get_config('tool_autorestore', 'from');
+	if ( $backupsdir && is_dir($backupsdir) ) {
+		$files = scandir($backupsdir);
+		print_object($files);
+		foreach ( $files as $file ) {
+			echo $file;
+		}
+	}
+}
 
 echo $renderer->footer();

@@ -14,16 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die;
+
 /**
  * Strings for component 'tool_autorestore', language 'en'.
  *
  * @package   tool_autorestore
  * @copyright  2015 Universitat de les Illes Balears http://www.uib.es
- * @authors     Toni Mas, Ricardo Díaz
+ * @author     Toni Mas, Ricardo Díaz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['aftersaving...'] = 'Once you have saved your settings, you may wish to';
+$string['aftersaving'] = 'Once you have saved your settings, you may wish to';
 $string['doitnow'] = 'perform an massive restore right now';
 $string['restoredcourses'] = 'Restored courses';
 $string['pluginname_desc'] = 'Description';
@@ -99,3 +101,5 @@ $string['generalhistories'] = 'Include histories';
 $string['configgeneralhistories'] = 'Sets the default for including user history within a restore.';
 $string['generalquestionbank'] = 'Include question bank';
 $string['configgeneralquestionbank'] = 'If enabled the question bank will be included in restores by default. PLEASE NOTE: Disabling this setting will disable the restore of activities which use the question bank, such as the quiz.';
+
+$string['disabled'] = 'The plugin is disabled. If you want to use it you need to activate';

@@ -33,7 +33,7 @@ if ($hassiteconfig) {
 
     // Create a page for autorestore general tool configuration and defaults.
 
-    //General restore defaults section
+    // General restore defaults section
     $temp = new admin_settingpage('autorestoregeneralsettings', new lang_string('generalautorestoredefaults', 'tool_autorestore'), 'moodle/site:config');
     $temp->add(new admin_setting_configselect('tool_autorestore/active', new lang_string('active', 'tool_autorestore'),  new lang_string('autoactivedescription', 'tool_autorestore'), 0, array(
         0 => new lang_string('autoactivedisabled', 'tool_autorestore'),
