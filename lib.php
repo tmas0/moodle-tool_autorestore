@@ -238,3 +238,32 @@ function log_line($string) {
         fwrite($this->logfp, $string . "\n");
     }
 }
+
+
+/**
+ * Class to manage the automated restore tool.
+ *
+ * @package     tool_autorestore
+ * @copyright   2015 Universitat de les Illes Balears http://www.uib.cat
+ * @author      Toni Mas, Ricardo Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class tool_autorestore {
+    /**
+     * Constructor.
+     */
+    public function __construct() {
+        // Nothing to do.
+    }
+
+    /**
+     * Get all errors.
+     *
+     * @return array Of errors.
+     */
+    public static function get_errors() {
+        global $DB;
+
+        return $DB->get_records('tool_autorestore_error');
+    }
+}

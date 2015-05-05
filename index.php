@@ -64,13 +64,34 @@ if ( $enabled == 0 ) {
 	echo $renderer->box(get_string('disabled', 'tool_autorestore'));
 } else {
 
+	// List of backups with restore errors.
+	echo $renderer->heading( get_string('backupwitherrors', 'tool_autorestore'), 3 );
+
+	if ( $errors = tool_autorestore::get_errors() ) {
+		echo $renderer->print_errors($errors);
+	} else {
+		echo $renderer->box(get_string('nobackupswitherrors', 'tool_autorestore'));
+	}
+
+	// List of restored backups.
+	echo $renderer->heading( get_string('filesrestored', 'tool_autorestore'), 3 );
+	$restoreddir = get_config('tool_autorestore', 'destination');
+	if ( $restoreddir && is_dir($restoreddir) ) {
+		if ( $files = array_diff(scandir($restoreddir), array('..', '.')) ) {
+			echo $renderer->files_restored($files);
+		} else {
+			echo $renderer->box(get_string('emptydirrestored', 'tool_autorestore'));          
+		}
+	}
+
 	// List of pending backups.
+	echo $renderer->heading( get_string('filespending', 'tool_autorestore'), 3 );
 	$backupsdir = get_config('tool_autorestore', 'from');
 	if ( $backupsdir && is_dir($backupsdir) ) {
-		$files = scandir($backupsdir);
-		print_object($files);
-		foreach ( $files as $file ) {
-			echo $file;
+		if ( $files = array_diff(scandir($backupsdir), array('..', '.')) ) {
+			echo $renderer->files_pending($files);
+		} else {
+			echo $renderer->box(get_string('emptydirbackup', 'tool_autorestore'));          
 		}
 	}
 }
