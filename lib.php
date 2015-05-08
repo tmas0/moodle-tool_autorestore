@@ -69,14 +69,14 @@ function cron() {
 //Print_object($CFG);
 
     // Get configs
-    $backups            = $this->get_config('from'); // Get backups from
-    $restored           = $this->get_config('destination'); //Move restored backups to
+    $backups            = get_config('tool_autorestore','from'); // Get backups from
+    $restored           = get_config('tool_autorestore','destination'); //Move restored backups to
     $norestored         = $restored.'/norestored/'; //Move NO restored backups to
-    $logtolocation      = $this->get_config('logtolocation');
-    $mailadmins         = $this->get_config('mailadmins');
-    $mailsubject        = $this->get_config('mailsubject');
+    $logtolocation      = get_config('tool_autorestore','logtolocation');
+    $mailadmins         = get_config('tool_autorestore','mailadmins');
+    $mailsubject        = get_config('tool_autorestore','mailsubject');
 
-    $running            = $this->get_config('running'); //Flag autorestore is running
+    $running            = get_config('tool_autorestore','running'); //Flag autorestore is running
 
     $this->logfp = false; // File pointer for writing log data to
     if(!empty($logtolocation)) {
@@ -188,37 +188,10 @@ $DB->get_records_sql('SELECT 1');
         $this->log_line("----------------------------------------------------------------------------------\n".userdate(time())." -> Autorestore cron process is running\n----------------------------------------------------------------------------------");
     }
 
-    if (!empty($mailadmins)) {
-        $msg = "Autorestore has been carried out within Moodle.\nTime taken: $timeelapsed seconds.\n\n";
-        if(!empty($logtolocation)){
-            if($this->logfp){
-                $msg .= "Log data has been written to:\n";
-                $msg .= "$logtolocation\n";
-                $msg .= "(Log file size: ".ceil(filesize($logtolocation)/1024)."Kb)\n\n";
-            } else {
-                $msg .= "The log file appears not to have been successfully written.\nCheck that the file is writeable by the server:\n";
-                $msg .= "$logtolocation\n\n";
-            }
-        } else {
-            $msg .= 'Logging is currently not active.';
-        }
-        if($fileisnew) {
-            $eventdata = new stdClass();
-            $eventdata->modulename        = 'moodle';
-            $eventdata->component         = 'tool_autorestore';
-            $eventdata->name              = 'autorestore';
-            $eventdata->userfrom          = get_admin();
-            $eventdata->userto            = get_admin();
-            $eventdata->subject           = $mailsubject;
-            $eventdata->fullmessage       = $msg;
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml   = '';
-            $eventdata->smallmessage      = '';
-            message_send($eventdata);
-    
-            $this->log_line('Notification email sent to administrator.');
-        }
-    } //end mail
+    if ( $mailadmins ) {
+        tool_autorestore::send_email($logtolocation, $timeelapsed);
+        $this->log_line(get_string('emailsended', 'tool_autorestore'));
+    }
 
     if ($this->logfp) {
         fclose($this->logfp);
@@ -265,5 +238,59 @@ class tool_autorestore {
         global $DB;
 
         return $DB->get_records('tool_autorestore_error');
+    }
+
+    /**
+     * Get file size.
+     *
+     * @param string $file The file, include the full path.
+     * @return int size in KB.
+     */
+    public static function get_filesize($file) {
+        if ( file_exists($file) ) {
+            return ceil(filesize($file)/1024);
+        }
+        // If file not exists, throw exception.
+        throw new coding_exception(get_string('filenotexists', 'tool_autorestore', $file));
+    }
+
+    /**
+     * Send email to admins.
+     *
+     * @param string $logfile The log file.
+     * @param int $timeelapsed The time elapsed in the execution.
+     * @return void
+     */
+    public static function send_email($logfile, $timeelapsed) {
+        
+        $msg = get_string('autorestoreexecuted', 'tool_autorestore') . ".\n";
+        $msg .= get_string('timetaken', 'tool_autorestore', $timeelapsed) . "\n\n";
+
+        if ( !empty(get_config('tool_autorestore', 'logtolocation')) ) {
+            if ( file_exists($logfile) ) {
+                $msg .= get_string('logwrittento', 'tool_autorestore') . "\n";
+                $msg .= $logfile . "\n";
+                $msg .= get_string('logsize', 'tool_autorestore', tool_autorestore::get_filesize($logfile) ) . "\n\n";
+            } else {
+                $msg .= get_string('lognowritten', 'tool_autorestore') . "\n";
+                $msg .= get_string('checkdirpermissions', 'tool_autorestore') . "\n";
+                $msg .= $logtolocation . "\n\n";
+            }
+        } else {
+            $msg .= get_string('loggingnotactive', 'tool_autorestore');
+        }
+
+        $eventdata = new stdClass();
+        $eventdata->modulename        = 'moodle';
+        $eventdata->component         = 'tool_autorestore';
+        $eventdata->name              = 'autorestore';
+        $eventdata->userfrom          = get_admin();
+        $eventdata->userto            = get_admin();
+        $eventdata->subject           = get_config('tool_autorestore', 'mailsubject');
+        $eventdata->fullmessage       = $msg;
+        $eventdata->fullmessageformat = FORMAT_PLAIN;
+        $eventdata->fullmessagehtml   = '';
+        $eventdata->smallmessage      = '';
+        message_send($eventdata);
     }
 }
