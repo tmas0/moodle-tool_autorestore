@@ -100,14 +100,14 @@ function cron() {
             $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
 
             // Get or create category
-            if (file_exists($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml')) {
+            if ( file_exists( $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml') ) {
                 $xml = simplexml_load_file($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml');
                 $shortname = (string)($xml->shortname);
                 $fullname = (string)($xml->fullname);
                 $categoryname = (string)($xml->category->name);
-                $DB->get_records_sql('SELECT 1');
+
+                // Manage the category. If not exist, create it.
                 $categoryid = $DB->get_field('course_categories', 'id', array('name'=>$categoryname));
-$DB->get_records_sql('SELECT 1');
 
                 if (!$categoryid) {
                     $categoryid = $DB->insert_record('course_categories', (object)array(
@@ -126,7 +126,7 @@ $DB->get_records_sql('SELECT 1');
 $DB->get_records_sql('SELECT 1');
 
                 // Restore backup into course
-                $controller = new restore_controller($rand, $courseid,
+                $controller = new restore_controller($extractdir, $courseid,
                                 backup::INTERACTIVE_NO, backup::MODE_SAMESITE, 2,
                                 backup::TARGET_NEW_COURSE);
                 $this->log_line("Restore backup into course\n");
@@ -154,7 +154,7 @@ $DB->get_records_sql('SELECT 1');
                 $mover_backup= shell_exec('mv '.$backups."$mbzArr[$i] ".$norestored);
                 exit('Failed to open course.xml.');
             }
-            unset($xml,$shortname,$fullname,$categoryname,$categoryid,$courseid,$controller,$nmuext,$rand);
+            unset($xml,$shortname,$fullname,$categoryname,$categoryid,$courseid,$controller,$extractdir);
             $this->log_line('Unset variables'."\n\n");
 $DB->get_records_sql('SELECT 1');
         }
