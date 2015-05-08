@@ -63,7 +63,7 @@ function cron() {
 
     //Start the restore process for the mbz files
     require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
-    require_once($CFG->dirroot . '/lib/filestorage/zip_packer.php');
+    
 
     global $CFG;
 //Print_object($CFG);
@@ -89,41 +89,19 @@ function cron() {
 
         $this->log_line("----------------------------------------------------------------------------------\nAutorestore cron process launched at ".userdate(time())."\n");
 
-        //Read in the mbz files
-        $mbzArr = array(); 
+        // Get all backups.
+        $backupfiles = tool_autorestore::get_moodle_backups($backups); // $mbzArr = array(); 
 
-        if ($handle = opendir($backups)) {
-            $DB->get_records_sql('SELECT 1');
-            while (false !== ($entry = readdir($handle))) {
-                $DB->get_records_sql('SELECT 1');
-                $file_info = pathinfo($backups.$entry);
-                if(strtolower($file_info['extension']) == "mbz") {
-		    $mbzArr[] = $entry;
-                }
-            }
-            closedir($handle);
-        }
-
-        for($i=0;$i<count($mbzArr);$i++) {
+        foreach ( $backupsfiles as $backupfile ) {
+        //for($i=0;$i<count($mbzArr);$i++) {
             $this->log_line('Start for()'."\n\n");
-            $DB->get_records_sql('SELECT 1');
 
-	    //Unzip the backup
-            $rand = 2;
-            while(strlen($rand)<10) {
-                $rand = '0'.$rand;
-            }
-            $rand .= rand();
-            check_dir_exists($CFG->dataroot . '/temp/backup');
-            $nmuext = new zip_packer;
-            mtrace("Starting to extract: ".$backups . $mbzArr[$i]." to: ".$CFG->dataroot . '/temp/backup/' . $rand);
-$DB->get_records_sql('SELECT 1');
-            $nmuext->extract_to_pathname($backups . $mbzArr[$i], $CFG->dataroot . '/temp/backup/' . $rand);
-$DB->get_records_sql('SELECT 1');
+            // Unzip Moodle backup.
+            $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
 
             // Get or create category
-            if (file_exists($CFG->dataroot . '/temp/backup/' . $rand . '/course/course.xml')) {
-                $xml = simplexml_load_file($CFG->dataroot . '/temp/backup/' . $rand . '/course/course.xml');
+            if (file_exists($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml')) {
+                $xml = simplexml_load_file($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml');
                 $shortname = (string)($xml->shortname);
                 $fullname = (string)($xml->fullname);
                 $categoryname = (string)($xml->category->name);
@@ -292,5 +270,60 @@ class tool_autorestore {
         $eventdata->fullmessagehtml   = '';
         $eventdata->smallmessage      = '';
         message_send($eventdata);
+    }
+
+    /**
+     * Get Moodle pending moodle backups.
+     *
+     * @param string $backupdir The backup directory.
+     * @return array Of backup files.
+     */
+    public static function get_moodle_backups($backupdir) {
+
+        $backupfiles = array();
+        
+        if ( file_exists($backupdir) ) {
+            // Get potencial backups.
+            if ( $files = scandir($backupdir) ) {
+                foreach ( $files as $file ) {
+                    $file_info = pathinfo($backupdir.$file);
+                    if ( strtolower( $file_info['extension'] ) == "mbz" ) {
+                        $backupfiles[] = $file;
+                    }
+                }
+            }
+        } else {
+            throw new coding_exception(get_string('invalidbackupdir', 'tool_autorestore'), $backupdir);
+        }
+
+        return $backupfiles;
+    }
+
+    /**
+     * Unzip the backup. (Tedioso cuando los zips sean grandes)
+     *
+     * @param string $path Path to backups.
+     * @param string $backupfile The backup file.
+     * @return string Name of unzip directory.
+     */
+    public static function unzip_moodle_backup($path, $backupfile) {
+        global $CFG;
+
+        require_once($CFG->dirroot . '/lib/filestorage/zip_packer.php');
+
+        // Create dirname from backup file name hash.
+        $extractdir = sha1($backupfile);
+        
+        // Check.
+        check_dir_exists($CFG->dataroot . '/temp/backup');
+        
+        $nmuext = new zip_packer();
+
+        // mtrace("Starting to extract: ".$backups . $mbzArr[$i]." to: ".$CFG->dataroot . '/temp/backup/' . $rand);
+
+        // Extract backup file.
+        $nmuext->extract_to_pathname($path . $backupfile, $CFG->dataroot . '/temp/backup/' . $extractdir);
+
+        return $extractdir;
     }
 }
