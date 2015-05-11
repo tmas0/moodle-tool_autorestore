@@ -109,34 +109,60 @@ function cron() {
                 // First step, get category id. If it not exists, create and get this id.
                 $categoryid = tool_autorestore::get_categoryid($categoryname);
 
-                // Create new course
+                // Create new course.
                 $this->log_line("Create new course\n");
+                try {
+                    $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
+                } catch (Exception $e) {
+                    $this->log_line('Cannot create course: '.$e->getMessage());
+                    // Goto next course backup.
+                    continue;
+                }
 
-                $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
-                $this->log_line('restore_dbops::create_new_course'."\n");
-$DB->get_records_sql('SELECT 1');
+                // Get super admin.
+                $admin = get_admin();
 
-                // Restore backup into course
-                $controller = new restore_controller($extractdir, $courseid,
-                                backup::INTERACTIVE_NO, backup::MODE_SAMESITE, 2,
-                                backup::TARGET_NEW_COURSE);
+                // Restore backup controller into course.
+                $controller = new restore_controller($extractdir, 
+                                                $courseid,
+                                                backup::INTERACTIVE_NO, 
+                                                backup::MODE_SAMESITE, 
+                                                $admin->id,
+                                                backup::TARGET_NEW_COURSE
+                                            );
+
                 $this->log_line("Restore backup into course\n");
-$DB->get_records_sql('SELECT 1');
 
-                $controller->get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, false, true));
-                $this->log_line('get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, false, true))'."\n");
-$DB->get_records_sql('SELECT 1');
+                // Define output logger.
+                $controller->get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, true, true));
 
-                $controller->execute_precheck();
-                $this->log_line('execute_precheck()'."\n");
-$DB->get_records_sql('SELECT 1');
+                // Precheck.
+                try {
+                    $controller->execute_precheck(true);
+                } catch (Exception $e) {
+                    $this->log_line('Error precheck: '. $e->getMessage());
+                    continue;
+                }
 
-		$controller->execute_plan();
-                $this->log_line('execute_plan()'."\n");
-$DB->get_records_sql('SELECT 1');
+                $this->log_line('execute_precheck() success'."\n");
 
-                //Mover backups restaurados
-                $mover_backup= shell_exec('mv '.$backups."$mbzArr[$i] ".$restored);
+                // Restore backup.
+                try {
+                    $controller->execute_plan();
+                } catch (Exception $e) {
+                    $this->log_line('Error on restore plan: '. $e->getMessage());
+                    continue;
+                }
+                
+                $this->log_line('execute_plan() success'."\n");
+
+                // Destroy the controller.
+                $controller->destroy();
+
+                // Move backup to success directory.
+                if ( shell_exec('/usr/bin/mv '. $backups . $backupfile . ' ' . $restored ) ) {
+                    $this->log_line('Moved backup'."\n\n");
+                }
                 $this->log_line('Mover backups restaurados'."\n\n");
 $DB->get_records_sql('SELECT 1');
 
