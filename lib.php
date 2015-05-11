@@ -62,122 +62,7 @@ class admin_setting_special_autorestoredays extends admin_setting_configmultiche
 function cron() {
 
     //Start the restore process for the mbz files
-    require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
-    
-
-    global $CFG;
-//Print_object($CFG);
-
-    // Get configs
-    $backups            = get_config('tool_autorestore','from'); // Get backups from
-    $restored           = get_config('tool_autorestore','destination'); //Move restored backups to
-    $norestored         = $restored.'/norestored/'; //Move NO restored backups to
-    $logtolocation      = get_config('tool_autorestore','logtolocation');
-    $mailadmins         = get_config('tool_autorestore','mailadmins');
-    $mailsubject        = get_config('tool_autorestore','mailsubject');
-
-    $running            = get_config('tool_autorestore','running'); //Flag autorestore is running
-
-    $this->logfp = false; // File pointer for writing log data to
-    if(!empty($logtolocation)) {
-        $this->logfp = fopen($logtolocation, 'a');
-    }
-
-    if ($running==false) {
-        @set_time_limit(0);
-        $starttime = time();
-
-        $this->log_line("----------------------------------------------------------------------------------\nAutorestore cron process launched at ".userdate(time())."\n");
-
-        // Get all backups.
-        $backupfiles = tool_autorestore::get_moodle_backups($backups); // $mbzArr = array(); 
-
-        foreach ( $backupsfiles as $backupfile ) {
-        //for($i=0;$i<count($mbzArr);$i++) {
-            $this->log_line('Start for()'."\n\n");
-
-            // Unzip Moodle backup.
-            $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
-
-            // Restore new course.
-            if ( file_exists( $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml') ) {
-                $xml = simplexml_load_file($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml');
-                $shortname = (string)($xml->shortname);
-                $fullname = (string)($xml->fullname);
-                $categoryname = (string)($xml->category->name);
-
-                // First step, get category id. If it not exists, create and get this id.
-                $categoryid = tool_autorestore::get_categoryid($categoryname);
-
-                // Create new course.
-                $this->log_line("Create new course\n");
-                try {
-                    $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
-                } catch (Exception $e) {
-                    $this->log_line('Cannot create course: '.$e->getMessage());
-                    // Goto next course backup.
-                    continue;
-                }
-
-                // Get super admin.
-                $admin = get_admin();
-
-                // Restore backup controller into course.
-                $controller = new restore_controller($extractdir, 
-                                                $courseid,
-                                                backup::INTERACTIVE_NO, 
-                                                backup::MODE_SAMESITE, 
-                                                $admin->id,
-                                                backup::TARGET_NEW_COURSE
-                                            );
-
-                $this->log_line("Restore backup into course\n");
-
-                // Define output logger.
-                $controller->get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, true, true));
-
-                // Precheck.
-                try {
-                    $controller->execute_precheck(true);
-                } catch (Exception $e) {
-                    $this->log_line('Error precheck: '. $e->getMessage());
-                    continue;
-                }
-
-                $this->log_line('execute_precheck() success'."\n");
-
-                // Restore backup.
-                try {
-                    $controller->execute_plan();
-                } catch (Exception $e) {
-                    $this->log_line('Error on restore plan: '. $e->getMessage());
-                    continue;
-                }
-                
-                $this->log_line('execute_plan() success'."\n");
-
-                // Destroy the controller.
-                $controller->destroy();
-
-                // Move backup to success directory.
-                if ( shell_exec('/usr/bin/mv '. $backups . $backupfile . ' ' . $restored ) ) {
-                    $this->log_line('Moved backup'."\n\n");
-                }
-                $this->log_line('Mover backups restaurados'."\n\n");
-$DB->get_records_sql('SELECT 1');
-
-            } else {
-                $this->log_line('Failed to open course'."\n\n");
-                $mover_backup= shell_exec('mv '.$backups."$mbzArr[$i] ".$norestored);
-                exit('Failed to open course.xml.');
-            }
-            unset($xml,$shortname,$fullname,$categoryname,$categoryid,$courseid,$controller,$extractdir);
-            $this->log_line('Unset variables'."\n\n");
-$DB->get_records_sql('SELECT 1');
-        }
-    
-    $timeelapsed = time() - $starttime;
-    $this->log_line('Process has completed. Time taken: '.$timeelapsed.' seconds.');
+    tool_autorestore::execute();
 
     } elseif ($running==true) {
         $this->log_line("----------------------------------------------------------------------------------\n".userdate(time())." -> Autorestore cron process is running\n----------------------------------------------------------------------------------");
@@ -372,5 +257,128 @@ class tool_autorestore {
         } else {
             return $categoryid;
         }
+    }
+
+    /**
+     * Execute auto restore backups.
+     *
+     * @return void
+     */
+    public static function execute() {
+        global $CFG;
+
+        require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+
+        // Get configs
+        $backups            = get_config('tool_autorestore','from'); // Get backups path.
+        $restored           = get_config('tool_autorestore','destination'); // Move succeded restored backups to this path.
+        $logtolocation      = get_config('tool_autorestore','logtolocation'); // The log.
+        $mailadmins         = get_config('tool_autorestore','mailadmins'); // Send email to admins.
+        $mailsubject        = get_config('tool_autorestore','mailsubject'); // The subject of mail.
+        $running            = get_config('tool_autorestore','running'); // Flag autorestore is running.
+
+        $this->logfp = false; // File pointer for writing log data to
+        if(!empty($logtolocation)) {
+            $this->logfp = fopen($logtolocation, 'a');
+        }
+
+        // Can be execute.
+        if ( $running == false ) {
+            
+            // Get current time.
+            $starttime = time();
+
+            $this->log_line("----------------------------------------------------------------------------------\n
+                Autorestore cron process launched at ".userdate(time())."\n");
+
+            // Get all backups.
+            $backupfiles = tool_autorestore::get_moodle_backups($backups); // $mbzArr = array(); 
+
+            // Walking for each pending backup.
+            foreach ( $backupsfiles as $backupfile ) {
+                $this->log_line('Start for()'."\n\n");
+
+                // Unzip Moodle backup.
+                $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
+
+                // Restore new course.
+                if ( file_exists( $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml') ) {
+                    $xml = simplexml_load_file($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml');
+                    $shortname = (string)($xml->shortname);
+                    $fullname = (string)($xml->fullname);
+                    $categoryname = (string)($xml->category->name);
+
+                    // First step, get category id. If it not exists, create and get this id.
+                    try {
+                        $categoryid = tool_autorestore::get_categoryid($categoryname);
+                    } catch (Exception $e) {
+                        $this->log_line('Fatal error when get_categoryid(): '. $e->getMessage());
+                        continue;
+                    }
+
+                    // Create new course.
+                    $this->log_line("Create new course\n");
+                    try {
+                        $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
+                    } catch (Exception $e) {
+                        $this->log_line('Cannot create course: '.$e->getMessage());
+                        // Goto next course backup.
+                        continue;
+                    }
+
+                    // Get super admin.
+                    $admin = get_admin();
+
+                    // Restore backup controller into course.
+                    $controller = new restore_controller($extractdir, 
+                                                    $courseid,
+                                                    backup::INTERACTIVE_NO, 
+                                                    backup::MODE_SAMESITE, 
+                                                    $admin->id,
+                                                    backup::TARGET_NEW_COURSE
+                                                );
+
+                    $this->log_line("Restore backup into course\n");
+
+                    // Define output logger.
+                    $controller->get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, true, true));
+
+                    // Precheck.
+                    try {
+                        $controller->execute_precheck(true);
+                    } catch (Exception $e) {
+                        $this->log_line('Error precheck: '. $e->getMessage());
+                        continue;
+                    }
+
+                    $this->log_line('execute_precheck() success'."\n");
+
+                    // Restore backup.
+                    try {
+                        $controller->execute_plan();
+                    } catch (Exception $e) {
+                        $this->log_line('Error on restore plan: '. $e->getMessage());
+                        continue;
+                    }
+                    
+                    $this->log_line('execute_plan() success'."\n");
+
+                    // Destroy the controller.
+                    $controller->destroy();
+
+                    // Move backup to success directory.
+                    if ( shell_exec('/usr/bin/mv '. $backups . $backupfile . ' ' . $restored ) ) {
+                        $this->log_line('Moved backup'."\n\n");
+                    } else {
+                        $this->log_line('Fail to move backup'."\n\n");
+                    }
+
+                } else {
+                    $this->log_line('Failed to open course'."\n\n");
+                }
+            }
+
+            $timeelapsed = time() - $starttime;
+            $this->log_line('Process has completed. Time taken: '.$timeelapsed.' seconds.');
     }
 }
