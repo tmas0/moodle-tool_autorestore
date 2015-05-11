@@ -107,3 +107,4 @@ $string['restoreto'] = 'Move restored courses to';
 $string['setautorestoreparameters'] = 'Set autorestore parameters'; //restore_form.php
 $string['loggingnotactive'] = 'Logging is currently not active.';
 $string['invalidbackupdir'] = 'The directory {$a} does not exists';
+$string['invalidcategoryname'] = 'The category name: {$a} is empty or invalid';

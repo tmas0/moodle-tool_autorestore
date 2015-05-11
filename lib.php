@@ -99,27 +99,18 @@ function cron() {
             // Unzip Moodle backup.
             $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
 
-            // Get or create category
+            // Restore new course.
             if ( file_exists( $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml') ) {
                 $xml = simplexml_load_file($CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml');
                 $shortname = (string)($xml->shortname);
                 $fullname = (string)($xml->fullname);
                 $categoryname = (string)($xml->category->name);
 
-                // Manage the category. If not exist, create it.
-                $categoryid = $DB->get_field('course_categories', 'id', array('name'=>$categoryname));
+                // First step, get category id. If it not exists, create and get this id.
+                $categoryid = tool_autorestore::get_categoryid($categoryname);
 
-                if (!$categoryid) {
-                    $categoryid = $DB->insert_record('course_categories', (object)array(
-                                      'name' => $categoryname,
-                                      'parent' => 0,
-                                      'visible' => 1
-                                      ));
-                    $DB->set_field('course_categories', 'path', '/' . $categoryid, array('id'=>$categoryid));
-                }
                 // Create new course
                 $this->log_line("Create new course\n");
-$DB->get_records_sql('SELECT 1');
 
                 $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
                 $this->log_line('restore_dbops::create_new_course'."\n");
@@ -325,5 +316,35 @@ class tool_autorestore {
         $nmuext->extract_to_pathname($path . $backupfile, $CFG->dataroot . '/temp/backup/' . $extractdir);
 
         return $extractdir;
+    }
+
+    /**
+     * Get the category of restored course backup.
+     *
+     * @param string $categoryname The category name.
+     * @return int The category id.
+     */
+    public static function get_categoryid($categoryname) {
+        global $CFG, $DB;
+
+        require_once($CFG->libdir.'/coursecatlib.php');
+
+        if ( empty($categoryname) ) {
+            throw new coding_exception(get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
+        }
+
+        // Get category, if it exists.
+        $categoryid = $DB->get_field('course_categories', 'id', array('name' => $categoryname));
+
+        if ( !$categoryid ) {
+            // Create new category.
+            $data = new stdClass();
+            $data->name = $categoryname;
+            $category = coursecat::create($data);
+
+            return $category->id;
+        } else {
+            return $categoryid;
+        }
     }
 }
