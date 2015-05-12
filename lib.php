@@ -241,7 +241,10 @@ class tool_autorestore {
         require_once($CFG->libdir.'/coursecatlib.php');
 
         if ( empty($categoryname) ) {
-            throw new coding_exception(get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
+            $this->log_line(get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
+            // Return default category.
+            $default = ccoursecat::get_default();
+            return $default->id;
         }
 
         // Get category, if it exists.
@@ -292,7 +295,7 @@ class tool_autorestore {
                 Autorestore cron process launched at ".userdate(time())."\n");
 
             // Get all backups.
-            $backupfiles = tool_autorestore::get_moodle_backups($backups); // $mbzArr = array(); 
+            $backupfiles = tool_autorestore::get_moodle_backups($backups);
 
             // Walking for each pending backup.
             foreach ( $backupsfiles as $backupfile ) {
@@ -309,12 +312,7 @@ class tool_autorestore {
                     $categoryname = (string)($xml->category->name);
 
                     // First step, get category id. If it not exists, create and get this id.
-                    try {
-                        $categoryid = tool_autorestore::get_categoryid($categoryname);
-                    } catch (Exception $e) {
-                        $this->log_line('Fatal error when get_categoryid(): '. $e->getMessage());
-                        continue;
-                    }
+                    $categoryid = tool_autorestore::get_categoryid($categoryname);
 
                     // Create new course.
                     $this->log_line("Create new course\n");
@@ -337,6 +335,41 @@ class tool_autorestore {
                                                     $admin->id,
                                                     backup::TARGET_NEW_COURSE
                                                 );
+
+                    // Include users on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_users') ) {
+                        $controller->get_plan()->get_setting('users')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
+
+                    // Include role assignments on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_role_assignments') ) {
+                        $controller->get_plan()->get_setting('role_assignments')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
+
+                    // Include activities on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_activities') ) {
+                        $controller->get_plan()->get_setting('activities')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
+
+                    // Include blocks on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_blocks') ) {
+                        $controller->get_plan()->get_setting('blocks')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
+
+                    // Include filters on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_filters') ) {
+                        $controller->get_plan()->get_setting('filters')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
+
+                    // Include comments on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_comments') ) {
+                        $controller->get_plan()->get_setting('comments')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
+
+                    // Include badges on import?
+                    if ( !get_config('tool_autorestore','autorestore_include_badges') ) {
+                        $controller->get_plan()->get_setting('badges')->set_status(backup_setting::LOCKED_BY_CONFIG);
+                    }
 
                     $this->log_line("Restore backup into course\n");
 

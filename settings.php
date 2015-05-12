@@ -53,14 +53,55 @@ if ($hassiteconfig) {
     $temp->add(new admin_setting_heading('generalsettings', new lang_string('generalsettings', 'tool_autorestore'), ''));
 
 
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_users', new lang_string('generalusers','tool_autorestore'), new lang_string('configgeneralusers','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_anonymize', new lang_string('generalanonymize','tool_autorestore'), new lang_string('configgeneralanonymize','tool_autorestore'), 0));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_role_assignments', new lang_string('generalroleassignments','tool_autorestore'), new lang_string('configgeneralroleassignments','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_activities', new lang_string('generalactivities','tool_autorestore'), new lang_string('configgeneralactivities','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_blocks', new lang_string('generalblocks','tool_autorestore'), new lang_string('configgeneralblocks','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_filters', new lang_string('generalfilters','tool_autorestore'), new lang_string('configgeneralfilters','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_comments', new lang_string('generalcomments','tool_autorestore'), new lang_string('configgeneralcomments','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_badges', new lang_string('generalbadges','tool_autorestore'), new lang_string('configgeneralbadges','tool_autorestore'), 1));
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_users', 
+    				new lang_string('includeusers','tool_autorestore'), 
+    				new lang_string('configincludeusers','tool_autorestore'), 
+    				1
+    			)
+    		);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_role_assignments', 
+    				new lang_string('includeroleassignments','tool_autorestore'), 
+    				new lang_string('configincluderoleassignments','tool_autorestore'), 
+    				1
+    			)
+    		);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_activities', 
+    				new lang_string('includeactivities','tool_autorestore'), 
+    				new lang_string('configincludeactivities','tool_autorestore'), 
+    				1
+    			)
+    		);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_blocks', 
+    				new lang_string('includeblocks','tool_autorestore'), 
+    				new lang_string('configincludeblocks','tool_autorestore'), 
+    				1
+    			)
+    		);
+
+    $temp->add(	new admin_setting_configcheckbox('tool_autorestore/autorestore_include_filters', 
+    				new lang_string('includefilters','tool_autorestore'), 
+    				new lang_string('configincludefilters','tool_autorestore'), 
+    				1
+    			)
+    		);
+
+    $temp->add(	new admin_setting_configcheckbox('tool_autorestore/autorestore_include_comments', 
+    				new lang_string('includecomments','tool_autorestore'), 
+    				new lang_string('configincludecomments','tool_autorestore'), 
+    				1
+    			)
+  			);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_badges', 
+    				new lang_string('includebadges','tool_autorestore'), 
+    				new lang_string('configincludebadges','tool_autorestore'), 
+    				1
+    			)
+    		);
+
     $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_userscompletion', new lang_string('generaluserscompletion','tool_autorestore'), new lang_string('configgeneraluserscompletion','tool_autorestore'), 1));
     $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_logs', new lang_string('generallogs','tool_autorestore'), new lang_string('configgenerallogs','tool_autorestore'), 0));
     $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_histories', new lang_string('generalhistories','tool_autorestore'), new lang_string('configgeneralhistories','tool_autorestore'), 0));
