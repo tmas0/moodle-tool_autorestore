@@ -77,19 +77,6 @@ function cron() {
         fclose($this->logfp);
     }
 
-}//END cron
-
-/**
-* Store logging information. This does two things: uses the {@link mtrace()}
-* function to print info to screen/STDOUT, and also writes log to a text file
-* if a path has been specified.
-* @param string $string Text to write (newline will be added automatically)
-*/
-function log_line($string) {
-    mtrace($string);
-    if ($this->logfp) {
-        fwrite($this->logfp, $string . "\n");
-    }
 }
 
 
@@ -221,7 +208,7 @@ class tool_autorestore {
         
         $nmuext = new zip_packer();
 
-        // mtrace("Starting to extract: ".$backups . $mbzArr[$i]." to: ".$CFG->dataroot . '/temp/backup/' . $rand);
+        tool_autorestore::log(get_string('filesizeproblems', 'tool_autorestore', tool_autorestore::get_filesize($path.$backupfile)));
 
         // Extract backup file.
         $nmuext->extract_to_pathname($path . $backupfile, $CFG->dataroot . '/temp/backup/' . $extractdir);
@@ -241,7 +228,7 @@ class tool_autorestore {
         require_once($CFG->libdir.'/coursecatlib.php');
 
         if ( empty($categoryname) ) {
-            $this->log_line(get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
+            tool_autorestore::log(get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
             // Return default category.
             $default = ccoursecat::get_default();
             return $default->id;
@@ -263,6 +250,94 @@ class tool_autorestore {
     }
 
     /**
+     * Apply settings into restore controller.
+     *
+     * @param restore_controller $controller The controller.
+     * @return restore_controller applid config settings.
+     */
+    public static function set_settings(restore_controller $controller) {
+        global $CFG;
+
+        // Include users on import?
+        if ( !get_config('tool_autorestore','autorestore_include_users') ) {
+            $controller->get_plan()->get_setting('users')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include role assignments on import?
+        if ( !get_config('tool_autorestore','autorestore_include_role_assignments') ) {
+            $controller->get_plan()->get_setting('role_assignments')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include activities on import?
+        if ( !get_config('tool_autorestore','autorestore_include_activities') ) {
+            $controller->get_plan()->get_setting('activities')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include blocks on import?
+        if ( !get_config('tool_autorestore','autorestore_include_blocks') ) {
+            $controller->get_plan()->get_setting('blocks')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include filters on import?
+        if ( !get_config('tool_autorestore','autorestore_include_filters') ) {
+            $controller->get_plan()->get_setting('filters')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include comments on import?
+        if ( !get_config('tool_autorestore','autorestore_include_comments') ) {
+            $controller->get_plan()->get_setting('comments')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include badges on import?
+        if ( !get_config('tool_autorestore','autorestore_include_badges') ) {
+            $controller->get_plan()->get_setting('badges')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include users completion on import?
+        if ( !get_config('tool_autorestore','autorestore_include_userscompletion') ) {
+            $controller->get_plan()->get_setting('userscompletion')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include logs on import?
+        if ( !get_config('tool_autorestore','autorestore_include_logs') ) {
+            $controller->get_plan()->get_setting('logs')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include histories on import?
+        if ( !get_config('tool_autorestore','autorestore_include_histories') ) {
+            $controller->get_plan()->get_setting('histories')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        // Include question bank on import?
+        if ( !get_config('tool_autorestore','autorestore_include_questionbank') ) {
+            $controller->get_plan()->get_setting('questionbank')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
+
+        return $controller;
+    }
+
+    /**
+     * Log on file an action.
+     *
+     * @param string $info Action or info.
+     * @return void
+     */
+    public static function log($info) {
+        mtrace($info);
+    }
+
+    /**
+     * Final action when succeded restored backup.
+     *
+     * @param string $file The file restored.
+     * @param string $dest Location to move the succeded backup.
+     * @return bool Succeded or not.
+     */
+    public static function succeded($file, $dest) {
+        return rename($file, $dest);
+    }
+
+    /**
      * Execute auto restore backups.
      *
      * @return void
@@ -279,10 +354,11 @@ class tool_autorestore {
         $mailadmins         = get_config('tool_autorestore','mailadmins'); // Send email to admins.
         $mailsubject        = get_config('tool_autorestore','mailsubject'); // The subject of mail.
         $running            = get_config('tool_autorestore','running'); // Flag autorestore is running.
+        $separator          = '-------------------------------------------------------------------------';
 
-        $this->logfp = false; // File pointer for writing log data to
-        if(!empty($logtolocation)) {
-            $this->logfp = fopen($logtolocation, 'a');
+        // If empty, display all messages on prompt.
+        if ( !empty($logtolocation) )
+            define('STDOUT', fopen($logtolocation, 'a'));
         }
 
         // Can be execute.
@@ -291,16 +367,14 @@ class tool_autorestore {
             // Get current time.
             $starttime = time();
 
-            $this->log_line("----------------------------------------------------------------------------------\n
-                Autorestore cron process launched at ".userdate(time())."\n");
+            tool_autorestore::log($separator);
+            tool_autorestore::log(get_string('launched', 'tool_autorestore', userdate(time())));
 
             // Get all backups.
             $backupfiles = tool_autorestore::get_moodle_backups($backups);
 
             // Walking for each pending backup.
             foreach ( $backupsfiles as $backupfile ) {
-                $this->log_line('Start for()'."\n\n");
-
                 // Unzip Moodle backup.
                 $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
 
@@ -315,11 +389,11 @@ class tool_autorestore {
                     $categoryid = tool_autorestore::get_categoryid($categoryname);
 
                     // Create new course.
-                    $this->log_line("Create new course\n");
+                    tool_autorestore::log(get_string('newcourse', 'tool_autorestore', $fullname));
                     try {
                         $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
                     } catch (Exception $e) {
-                        $this->log_line('Cannot create course: '.$e->getMessage());
+                        tool_autorestore::log(get_string('failcreatenewcourse', 'tool_autorestore', $e->getMessage()));
                         // Goto next course backup.
                         continue;
                     }
@@ -336,42 +410,10 @@ class tool_autorestore {
                                                     backup::TARGET_NEW_COURSE
                                                 );
 
-                    // Include users on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_users') ) {
-                        $controller->get_plan()->get_setting('users')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
+                    // Set all settings.
+                    $controller = tool_autorestore::set_settings($controller);
 
-                    // Include role assignments on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_role_assignments') ) {
-                        $controller->get_plan()->get_setting('role_assignments')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
-
-                    // Include activities on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_activities') ) {
-                        $controller->get_plan()->get_setting('activities')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
-
-                    // Include blocks on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_blocks') ) {
-                        $controller->get_plan()->get_setting('blocks')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
-
-                    // Include filters on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_filters') ) {
-                        $controller->get_plan()->get_setting('filters')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
-
-                    // Include comments on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_comments') ) {
-                        $controller->get_plan()->get_setting('comments')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
-
-                    // Include badges on import?
-                    if ( !get_config('tool_autorestore','autorestore_include_badges') ) {
-                        $controller->get_plan()->get_setting('badges')->set_status(backup_setting::LOCKED_BY_CONFIG);
-                    }
-
-                    $this->log_line("Restore backup into course\n");
+                    tool_autorestore::log(get_string('startrestoring', 'tool_autorestore'));
 
                     // Define output logger.
                     $controller->get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, true, true));
@@ -380,38 +422,42 @@ class tool_autorestore {
                     try {
                         $controller->execute_precheck(true);
                     } catch (Exception $e) {
-                        $this->log_line('Error precheck: '. $e->getMessage());
+                        tool_autorestore::log('failprecheck', 'tool_autorestore', $e->getMessage());
                         continue;
                     }
 
-                    $this->log_line('execute_precheck() success'."\n");
+                    tool_autorestore::log(get_string('executingrestore', 'tool_autorestore'));
 
                     // Restore backup.
                     try {
                         $controller->execute_plan();
                     } catch (Exception $e) {
-                        $this->log_line('Error on restore plan: '. $e->getMessage());
+                        tool_autorestore::log(get_string('failedexecuterestore', 'tool_autorestore', $e->getMessage()));
                         continue;
                     }
                     
-                    $this->log_line('execute_plan() success'."\n");
+                    tool_autorestore::log(get_string('restoresucceded', 'tool_autorestore'));
 
                     // Destroy the controller.
                     $controller->destroy();
 
                     // Move backup to success directory.
-                    if ( shell_exec('/usr/bin/mv '. $backups . $backupfile . ' ' . $restored ) ) {
-                        $this->log_line('Moved backup'."\n\n");
+                    if ( tool_autorestore::succeded($backups.$backupfile, $restored) ) {
+                        tool_autorestore::log(get_string('movedbackup', 'tool_autorestore'));
                     } else {
-                        $this->log_line('Fail to move backup'."\n\n");
+                        tool_autorestore::log(get_string('failedmovedbackup', 'tool_autorestore'));
                     }
 
                 } else {
-                    $this->log_line('Failed to open course'."\n\n");
+                    tool_autorestore::log( get_string('failedopencourse', 
+                                                        'tool_autorestore', 
+                                                        $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml')
+                                        );
                 }
             }
 
             $timeelapsed = time() - $starttime;
-            $this->log_line('Process has completed. Time taken: '.$timeelapsed.' seconds.');
+            tool_autorestore::log(get_string('processcompleted', 'tool_autorestore', $timeelapsed));
+        }
     }
 }

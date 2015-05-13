@@ -102,10 +102,33 @@ if ($hassiteconfig) {
     			)
     		);
 
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_userscompletion', new lang_string('generaluserscompletion','tool_autorestore'), new lang_string('configgeneraluserscompletion','tool_autorestore'), 1));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_logs', new lang_string('generallogs','tool_autorestore'), new lang_string('configgenerallogs','tool_autorestore'), 0));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_histories', new lang_string('generalhistories','tool_autorestore'), new lang_string('configgeneralhistories','tool_autorestore'), 0));
-    $temp->add(new admin_setting_configcheckbox('tool_autorestore/autorestore_general_questionbank', new lang_string('generalquestionbank','tool_autorestore'), new lang_string('configgeneralquestionbank','tool_autorestore'), 1));
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_userscompletion', 
+    				new lang_string('includeuserscompletion','tool_autorestore'), 
+    				new lang_string('configincludeuserscompletion','tool_autorestore'), 
+    				1
+    			)
+    		);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_logs', 
+    				new lang_string('includelogs','tool_autorestore'), 
+    				new lang_string('configincludelogs','tool_autorestore'), 
+    				0
+    			)
+    		);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_histories', 
+    				new lang_string('includehistories','tool_autorestore'), 
+    				new lang_string('configincludehistories','tool_autorestore'), 
+    				0
+    			)
+    		);
+
+    $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_questionbank', 
+    				new lang_string('includequestionbank','tool_autorestore'), 
+    				new lang_string('configincludequestionbank','tool_autorestore'), 
+    				1
+    			)
+  			);
 
     $ADMIN->add('restores', $temp);
 
