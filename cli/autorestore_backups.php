@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Definition of automated restore scheduled tasks.
+ * CLI Bulk to automatic restore courses.
  *
  * @package    tool_autorestore
  * @copyright  2015 Universitat de les Illes Balears http://www.uib.es
@@ -23,16 +23,41 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+define('CLI_SCRIPT', true);
 
-$tasks = array(
-    array(
-        'classname' => 'tool_autorestore\task\autorestore_task',
-        'blocking' => 0,
-        'minute' => '*',
-        'hour' => '*',
-        'day' => '*',
-        'month' => '*',
-        'dayofweek' => '*'
-    )
-);
+require(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/config.php');
+require_once($CFG->libdir . '/clilib.php');
+
+// Now get cli options.
+list($options, $unrecognized) = cli_get_params(array(
+    'help' => false,
+),
+array(
+    'h' => 'help',
+));
+
+if ($unrecognized) {
+    $unrecognized = implode("\n  ", $unrecognized);
+    cli_error(get_string('cliunknowoption', 'admin', $unrecognized));
+}
+
+$help =
+"Execute Massive Restore Course Backups.
+
+Options:
+-h, --help                 Print out this help
+
+Example:
+\$sudo -u www-data /usr/bin/php admin/tool/autorestore/cli/autorestore_backups.php
+";
+
+if ($options['help']) {
+    echo $help;
+    die();
+}
+echo "Moodle automatic restoring backup courses running ...\n";
+
+// Emulate normal session.
+cron_setup_user();
+
+tool_autorestore::execute();

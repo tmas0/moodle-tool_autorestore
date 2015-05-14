@@ -74,6 +74,7 @@ class tool_autorestore_renderer extends plugin_renderer_base {
 
 		return $output;
 	}
+	
 	/**
 	 * Print the restored files.
 	 *

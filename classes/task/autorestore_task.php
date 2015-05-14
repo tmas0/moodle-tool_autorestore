@@ -17,12 +17,14 @@
 /**
  * A scheduled task.
  *
- * @package   tool_autorestore
+ * @package    tool_autorestore
  * @copyright  2015 Universitat de les Illes Balears http://www.uib.es
  * @author     Toni Mas, Ricardo Díaz
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace tool_autorestore\task;
+
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Simple task to run the automated restore cron.
@@ -31,7 +33,7 @@ namespace tool_autorestore\task;
  * @author     Toni Mas, Ricardo Díaz
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class cron_task extends \core\task\scheduled_task {
+class autorestore_task extends \core\task\scheduled_task {
 
     /**
      * Get a descriptive name for this task (shown to admins).
@@ -48,9 +50,10 @@ class cron_task extends \core\task\scheduled_task {
      */
     public function execute() {
         global $CFG;
+        
         require_once($CFG->dirroot . '/admin/tool/autorestore/lib.php');
-        $ims = new \tool_autorestore_plugin();
-        $ims->cron();
+        
+        // Execute task.
+        tool_autorestore::execute();
     }
-
 }

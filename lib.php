@@ -26,12 +26,22 @@
  
 require_once($CFG->libdir.'/adminlib.php');
 
+/**
+ * Define list of week days who your choose to execute the autorestore.
+ *
+ */
 class admin_setting_special_autorestoredays extends admin_setting_configmulticheckbox2 {
     /**
      * Calls parent::__construct with specific arguments
      */
     public function __construct() {
-        parent::__construct('autorestore_weekdays', get_string('automatedrestoreschedule','tool_autorestore'), get_string('automatedrestoreschedulehelp','tool_autorestore'), array(), NULL);
+        parent::__construct('autorestore_weekdays', 
+                            get_string('automatedrestoreschedule','tool_autorestore'), 
+                            get_string('automatedrestoreschedulehelp','tool_autorestore'), 
+                            array(), 
+                            NULL
+                    );
+
         $this->plugin = 'tool_autorestore';
     }
 
@@ -64,19 +74,7 @@ function cron() {
     //Start the restore process for the mbz files
     tool_autorestore::execute();
 
-    } elseif ($running==true) {
-        $this->log_line("----------------------------------------------------------------------------------\n".userdate(time())." -> Autorestore cron process is running\n----------------------------------------------------------------------------------");
-    }
-
-    if ( $mailadmins ) {
-        tool_autorestore::send_email($logtolocation, $timeelapsed);
-        $this->log_line(get_string('emailsended', 'tool_autorestore'));
-    }
-
-    if ($this->logfp) {
-        fclose($this->logfp);
-    }
-
+    
 }
 
 
@@ -111,11 +109,22 @@ class tool_autorestore {
      * Get file size.
      *
      * @param string $file The file, include the full path.
-     * @return int size in KB.
+     * @return string Humman readable size.
      */
     public static function get_filesize($file) {
         if ( file_exists($file) ) {
-            return ceil(filesize($file)/1024);
+            $bytes = filesize($file);
+
+            // Human readeble.
+            $sz = 'BKMGTP';
+
+            // Decimals.
+            $decimals = 2;
+
+            // Extract the factor.
+            $factor = floor((strlen($bytes) - 1) / 3);
+
+            return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
         }
         // If file not exists, throw exception.
         throw new coding_exception(get_string('filenotexists', 'tool_autorestore', $file));
@@ -205,14 +214,26 @@ class tool_autorestore {
         
         // Check.
         check_dir_exists($CFG->dataroot . '/temp/backup');
-        
-        $nmuext = new zip_packer();
+
+
+        // Check if folder exists.
+        if ( file_exists($CFG->dataroot . '/temp/backup/'.$extractdir) ) {
+            if ( ! remove_dir($CFG->dataroot . '/temp/backup/'.$extractdir) ) {
+                throw new moodle_exception( get_string('removedirfailed', 
+                                                        'tool_autorestore', 
+                                                        $CFG->dataroot . '/temp/backup/'.$extractdir)
+                                            );
+                
+            }
+        }
+
+        $nmuext = new mbz_packer();
 
         tool_autorestore::log(get_string('filesizeproblems', 'tool_autorestore', tool_autorestore::get_filesize($path.$backupfile)));
 
         // Extract backup file.
         $nmuext->extract_to_pathname($path . $backupfile, $CFG->dataroot . '/temp/backup/' . $extractdir);
-
+        
         return $extractdir;
     }
 
@@ -220,15 +241,16 @@ class tool_autorestore {
      * Get the category of restored course backup.
      *
      * @param string $categoryname The category name.
+     * @param object $thelog The logfile.
      * @return int The category id.
      */
-    public static function get_categoryid($categoryname) {
+    public static function get_categoryid($categoryname, thelog) {
         global $CFG, $DB;
 
         require_once($CFG->libdir.'/coursecatlib.php');
 
         if ( empty($categoryname) ) {
-            tool_autorestore::log(get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
+            tool_autorestore::log($thelog, get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
             // Return default category.
             $default = ccoursecat::get_default();
             return $default->id;
@@ -319,11 +341,19 @@ class tool_autorestore {
     /**
      * Log on file an action.
      *
+     * @param file_descriptor $file The file.
      * @param string $info Action or info.
      * @return void
      */
-    public static function log($info) {
-        mtrace($info);
+    public static function log($file, $info, $eol="\n") {
+        
+        if ( !empty($file) ) {
+            fwrite($file, $info.$eol);
+        } else {
+            echo $info . $eol;
+        }
+
+        flush();
     }
 
     /**
@@ -338,6 +368,21 @@ class tool_autorestore {
     }
 
     /**
+     * Check if directory exists, if it not exists, created.
+     *
+     * @param string $dir The full path.
+     * @return bool or exception.
+     */
+    public static function check_dir($dir) {
+        global $CFG;
+
+        // Check.
+        if ( !check_dir_exists($dir) ) {
+            throw new moodle_exception(get_string('failedcreatedir', 'tool_autorestore', $dir));
+        }
+    }
+
+    /**
      * Execute auto restore backups.
      *
      * @return void
@@ -348,35 +393,46 @@ class tool_autorestore {
         require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
         // Get configs
-        $backups            = get_config('tool_autorestore','from'); // Get backups path.
-        $restored           = get_config('tool_autorestore','destination'); // Move succeded restored backups to this path.
+        $backupsdir         = get_config('tool_autorestore','from'); // Get backups path.
+        
+        // Check.
+        tool_autorestore::check_dir($backupsdir);
+
+        $successdir         = get_config('tool_autorestore','destination'); // Move succeded restored backups to this path.
+
+        // Check.
+        tool_autorestore::check_dir($successdir);
+
         $logtolocation      = get_config('tool_autorestore','logtolocation'); // The log.
+
+        if ( file_exists($logtolocation) && !is_file($logtolocation)) {
+            throw new moodle_exception(get_string('logisnotfile', 'tool_autorestore', $logtolocation));
+        }
+
         $mailadmins         = get_config('tool_autorestore','mailadmins'); // Send email to admins.
         $mailsubject        = get_config('tool_autorestore','mailsubject'); // The subject of mail.
         $running            = get_config('tool_autorestore','running'); // Flag autorestore is running.
         $separator          = '-------------------------------------------------------------------------';
 
-        // If empty, display all messages on prompt.
-        if ( !empty($logtolocation) )
-            define('STDOUT', fopen($logtolocation, 'a'));
-        }
-
+        // The log file.
+        $thelog = fopen($logtolocation, 'a');
+        
         // Can be execute.
         if ( $running == false ) {
             
             // Get current time.
             $starttime = time();
 
-            tool_autorestore::log($separator);
-            tool_autorestore::log(get_string('launched', 'tool_autorestore', userdate(time())));
+            tool_autorestore::log($thelog, $separator);
+            tool_autorestore::log($thelog, get_string('launched', 'tool_autorestore', userdate(time())));
 
             // Get all backups.
-            $backupfiles = tool_autorestore::get_moodle_backups($backups);
+            $backupfiles = tool_autorestore::get_moodle_backups($backupsdir);
 
             // Walking for each pending backup.
             foreach ( $backupsfiles as $backupfile ) {
                 // Unzip Moodle backup.
-                $unzipdir = tool_autorestore::unzip_moodle_backup($backups, $backupfile);
+                $unzipdir = tool_autorestore::unzip_moodle_backup($backupsdir, $backupfile);
 
                 // Restore new course.
                 if ( file_exists( $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml') ) {
@@ -389,11 +445,11 @@ class tool_autorestore {
                     $categoryid = tool_autorestore::get_categoryid($categoryname);
 
                     // Create new course.
-                    tool_autorestore::log(get_string('newcourse', 'tool_autorestore', $fullname));
+                    tool_autorestore::log($thelog, get_string('newcourse', 'tool_autorestore', $fullname));
                     try {
                         $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
                     } catch (Exception $e) {
-                        tool_autorestore::log(get_string('failcreatenewcourse', 'tool_autorestore', $e->getMessage()));
+                        tool_autorestore::log($thelog, get_string('failcreatenewcourse', 'tool_autorestore', $e->getMessage()));
                         // Goto next course backup.
                         continue;
                     }
@@ -413,7 +469,7 @@ class tool_autorestore {
                     // Set all settings.
                     $controller = tool_autorestore::set_settings($controller);
 
-                    tool_autorestore::log(get_string('startrestoring', 'tool_autorestore'));
+                    tool_autorestore::log($thelog, get_string('startrestoring', 'tool_autorestore'));
 
                     // Define output logger.
                     $controller->get_logger()->set_next(new output_indented_logger(backup::LOG_INFO, true, true));
@@ -422,7 +478,7 @@ class tool_autorestore {
                     try {
                         $controller->execute_precheck(true);
                     } catch (Exception $e) {
-                        tool_autorestore::log('failprecheck', 'tool_autorestore', $e->getMessage());
+                        tool_autorestore::log($thelog, 'failprecheck', 'tool_autorestore', $e->getMessage());
                         continue;
                     }
 
@@ -432,7 +488,7 @@ class tool_autorestore {
                     try {
                         $controller->execute_plan();
                     } catch (Exception $e) {
-                        tool_autorestore::log(get_string('failedexecuterestore', 'tool_autorestore', $e->getMessage()));
+                        tool_autorestore::log($thelog, get_string('failedexecuterestore', 'tool_autorestore', $e->getMessage()));
                         continue;
                     }
                     
@@ -442,14 +498,14 @@ class tool_autorestore {
                     $controller->destroy();
 
                     // Move backup to success directory.
-                    if ( tool_autorestore::succeded($backups.$backupfile, $restored) ) {
-                        tool_autorestore::log(get_string('movedbackup', 'tool_autorestore'));
+                    if ( tool_autorestore::succeded($backupsdir.$backupfile, $successdir) ) {
+                        tool_autorestore::log($thelog, get_string('movedbackup', 'tool_autorestore'));
                     } else {
-                        tool_autorestore::log(get_string('failedmovedbackup', 'tool_autorestore'));
+                        tool_autorestore::log($thelog, get_string('failedmovedbackup', 'tool_autorestore'));
                     }
 
                 } else {
-                    tool_autorestore::log( get_string('failedopencourse', 
+                    tool_autorestore::log($thelog, get_string('failedopencourse', 
                                                         'tool_autorestore', 
                                                         $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml')
                                         );
@@ -457,7 +513,15 @@ class tool_autorestore {
             }
 
             $timeelapsed = time() - $starttime;
-            tool_autorestore::log(get_string('processcompleted', 'tool_autorestore', $timeelapsed));
+            tool_autorestore::log(get_string($thelog, 'processcompleted', 'tool_autorestore', $timeelapsed));
+
+            // Close the log.
+            fclose($thelog);
+
+            // Send email to admins.
+            if ( $mailadmins ) {
+                tool_autorestore::send_email($logtolocation, $timeelapsed);
+            }
         }
     }
 }
