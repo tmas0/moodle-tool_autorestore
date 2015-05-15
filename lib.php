@@ -383,6 +383,37 @@ class tool_autorestore {
     }
 
     /**
+     * Save error on database.
+     *
+     * @param string The error.
+     * @param string The backup name.
+     * @return int Error id.
+     */
+    public static function save_error($backupname, $error) {
+        global $DB;
+
+        $row = new stdClass();
+        $row->error = $error;
+        $row->backupname = $backupname;
+        $row->timeexcecuted = time();
+
+        return $DB->insert_record('tool_autorestore_error', $row);
+    }
+
+    /**
+     * Clean old errors.
+     *
+     * @param string $backupname The backup name.
+     * @return bool
+     */
+    public static function clean_old_errors($backupname) {
+        global $DB;
+
+        return $DB->delete_records('tool_autorestore_error', array('backupname' => $backupname));
+    }
+
+
+    /**
      * Execute auto restore backups.
      *
      * @return void
@@ -450,6 +481,7 @@ class tool_autorestore {
                         $courseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
                     } catch (Exception $e) {
                         tool_autorestore::log($thelog, get_string('failcreatenewcourse', 'tool_autorestore', $e->getMessage()));
+                        tool_autorestore::save_error($backupfile, $e->getMessage());
                         // Goto next course backup.
                         continue;
                     }
@@ -479,6 +511,7 @@ class tool_autorestore {
                         $controller->execute_precheck(true);
                     } catch (Exception $e) {
                         tool_autorestore::log($thelog, 'failprecheck', 'tool_autorestore', $e->getMessage());
+                        tool_autorestore::save_error($backupfile, $e->getMessage());
                         continue;
                     }
 
@@ -489,6 +522,7 @@ class tool_autorestore {
                         $controller->execute_plan();
                     } catch (Exception $e) {
                         tool_autorestore::log($thelog, get_string('failedexecuterestore', 'tool_autorestore', $e->getMessage()));
+                        tool_autorestore::save_error($backupfile, $e->getMessage());
                         continue;
                     }
                     
@@ -503,6 +537,9 @@ class tool_autorestore {
                     } else {
                         tool_autorestore::log($thelog, get_string('failedmovedbackup', 'tool_autorestore'));
                     }
+
+                    // Clean old records.
+                    tool_autorestore::clean_old_errors($backupfile);
 
                 } else {
                     tool_autorestore::log($thelog, get_string('failedopencourse', 
