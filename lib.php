@@ -284,6 +284,11 @@ class tool_autorestore {
         if ( !get_config('tool_autorestore','autorestore_include_users') ) {
             $controller->get_plan()->get_setting('users')->set_status(backup_setting::LOCKED_BY_CONFIG);
         }
+        
+        // Restore as "Manual enrolments"?
+        if ( get_config('tool_autorestore','autorestore_include_enrol_manual') ) {
+            $controller->get_plan()->get_setting('enrol_manual')->set_status(backup_setting::LOCKED_BY_CONFIG);
+        }
 
         // Include role assignments on import?
         if ( !get_config('tool_autorestore','autorestore_include_role_assignments') ) {
