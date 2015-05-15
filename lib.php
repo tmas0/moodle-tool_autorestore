@@ -244,7 +244,7 @@ class tool_autorestore {
      * @param object $thelog The logfile.
      * @return int The category id.
      */
-    public static function get_categoryid($categoryname, thelog) {
+    public static function get_categoryid($categoryname, $thelog) {
         global $CFG, $DB;
 
         require_once($CFG->libdir.'/coursecatlib.php');
