@@ -68,7 +68,7 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configdirectory('tool_autorestore/from', 
     				new lang_string('restorefrom', 'tool_autorestore'), 
     				new lang_string('autorestorefromhelp', 'tool_autorestore'), 
-    				''
+    				$CFG->dataroot . '/backups'
     			)
     		);
 
@@ -76,7 +76,7 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configdirectory('tool_autorestore/destination', 
     				new lang_string('restoreto', 'tool_autorestore'), 
     				new lang_string('autorestoretohelp', 'tool_autorestore'), 
-    				''
+    				$CFG->dataroot . '/restored'
     			)
     		);
     
@@ -84,7 +84,7 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configfile('tool_autorestore/logtolocation', 
     				new lang_string('logtolocation', 'tool_autorestore'), 
     				'', 
-    				''
+    				$CFG->dataroot . '/backups/tool_autorestore.log'
     			)
     		);
 

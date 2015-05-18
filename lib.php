@@ -127,7 +127,7 @@ class tool_autorestore {
             return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
         }
         // If file not exists, throw exception.
-        throw new coding_exception(get_string('filenotexists', 'tool_autorestore', $file));
+        throw new moodle_exception(get_string('filenotexists', 'tool_autorestore', $file));
     }
 
     /**
@@ -204,13 +204,16 @@ class tool_autorestore {
      * @param string $backupfile The backup file.
      * @return string Name of unzip directory.
      */
-    public static function unzip_moodle_backup($path, $backupfile) {
+    public static function unzip_moodle_backup($path, $backupfile, $thelog) {
         global $CFG;
 
-        require_once($CFG->dirroot . '/lib/filestorage/zip_packer.php');
+        require_once($CFG->dirroot . '/lib/filestorage/mbz_packer.php');
 
         // Create dirname from backup file name hash.
         $extractdir = sha1($backupfile);
+
+        // Backup file path.
+        $thebackup = $path . '/' . $backupfile;
         
         // Check.
         check_dir_exists($CFG->dataroot . '/temp/backup');
@@ -229,10 +232,10 @@ class tool_autorestore {
 
         $nmuext = new mbz_packer();
 
-        tool_autorestore::log(get_string('filesizeproblems', 'tool_autorestore', tool_autorestore::get_filesize($path.$backupfile)));
+        tool_autorestore::log($thelog, get_string('filesizeproblems', 'tool_autorestore', tool_autorestore::get_filesize($thebackup)));
 
         // Extract backup file.
-        $nmuext->extract_to_pathname($path . $backupfile, $CFG->dataroot . '/temp/backup/' . $extractdir);
+        $nmuext->extract_to_pathname($thebackup, $CFG->dataroot . '/temp/backup/' . $extractdir);
         
         return $extractdir;
     }
@@ -332,12 +335,7 @@ class tool_autorestore {
 
         // Include histories on import?
         if ( !get_config('tool_autorestore','autorestore_include_histories') ) {
-            $controller->get_plan()->get_setting('histories')->set_status(backup_setting::LOCKED_BY_CONFIG);
-        }
-
-        // Include question bank on import?
-        if ( !get_config('tool_autorestore','autorestore_include_questionbank') ) {
-            $controller->get_plan()->get_setting('questionbank')->set_status(backup_setting::LOCKED_BY_CONFIG);
+            $controller->get_plan()->get_setting('grade_histories')->set_status(backup_setting::LOCKED_BY_CONFIG);
         }
 
         return $controller;
@@ -365,7 +363,7 @@ class tool_autorestore {
      * Final action when succeded restored backup.
      *
      * @param string $file The file restored.
-     * @param string $dest Location to move the succeded backup.
+     * @param string $dest Location to move the succeded backup and the backupname.
      * @return bool Succeded or not.
      */
     public static function succeded($file, $dest) {
@@ -430,16 +428,29 @@ class tool_autorestore {
 
         // Get configs
         $backupsdir         = get_config('tool_autorestore','from'); // Get backups path.
+
+        if ( empty($backupsdir) ) {
+            $backupsdir = $CFG->dataroot . '/backups';
+        }
         
         // Check.
         tool_autorestore::check_dir($backupsdir);
 
         $successdir         = get_config('tool_autorestore','destination'); // Move succeded restored backups to this path.
 
+        if ( empty($successdir) ) {
+            $successdir = $CFG->dataroot . '/restored';
+        }
+
         // Check.
         tool_autorestore::check_dir($successdir);
 
         $logtolocation      = get_config('tool_autorestore','logtolocation'); // The log.
+
+        // If not defined, set the default value.
+        if ( empty($logtolocation) ) {
+            $logtolocation = $CFG->dataroot . '/backups/tool_autorestore.log';
+        }
 
         if ( file_exists($logtolocation) && !is_file($logtolocation)) {
             throw new moodle_exception(get_string('logisnotfile', 'tool_autorestore', $logtolocation));
@@ -463,12 +474,12 @@ class tool_autorestore {
             tool_autorestore::log($thelog, get_string('launched', 'tool_autorestore', userdate(time())));
 
             // Get all backups.
-            $backupfiles = tool_autorestore::get_moodle_backups($backupsdir);
+            $backupsfiles = tool_autorestore::get_moodle_backups($backupsdir);
 
             // Walking for each pending backup.
             foreach ( $backupsfiles as $backupfile ) {
                 // Unzip Moodle backup.
-                $unzipdir = tool_autorestore::unzip_moodle_backup($backupsdir, $backupfile);
+                $unzipdir = tool_autorestore::unzip_moodle_backup($backupsdir, $backupfile, $thelog);
 
                 // Restore new course.
                 if ( file_exists( $CFG->dataroot . '/temp/backup/' . $unzipdir . '/course/course.xml') ) {
@@ -478,7 +489,7 @@ class tool_autorestore {
                     $categoryname = (string)($xml->category->name);
 
                     // First step, get category id. If it not exists, create and get this id.
-                    $categoryid = tool_autorestore::get_categoryid($categoryname);
+                    $categoryid = tool_autorestore::get_categoryid($categoryname, $thelog);
 
                     // Create new course.
                     tool_autorestore::log($thelog, get_string('newcourse', 'tool_autorestore', $fullname));
@@ -495,7 +506,7 @@ class tool_autorestore {
                     $admin = get_admin();
 
                     // Restore backup controller into course.
-                    $controller = new restore_controller($extractdir, 
+                    $controller = new restore_controller($unzipdir, 
                                                     $courseid,
                                                     backup::INTERACTIVE_NO, 
                                                     backup::MODE_SAMESITE, 
@@ -520,7 +531,7 @@ class tool_autorestore {
                         continue;
                     }
 
-                    tool_autorestore::log(get_string('executingrestore', 'tool_autorestore'));
+                    tool_autorestore::log($thelog, get_string('executingrestore', 'tool_autorestore'));
 
                     // Restore backup.
                     try {
@@ -531,13 +542,13 @@ class tool_autorestore {
                         continue;
                     }
                     
-                    tool_autorestore::log(get_string('restoresucceded', 'tool_autorestore'));
+                    tool_autorestore::log($thelog, get_string('restoresucceded', 'tool_autorestore'));
 
                     // Destroy the controller.
                     $controller->destroy();
 
                     // Move backup to success directory.
-                    if ( tool_autorestore::succeded($backupsdir.$backupfile, $successdir) ) {
+                    if ( tool_autorestore::succeded($backupsdir. '/' .$backupfile, $successdir. '/' .$backupfile) ) {
                         tool_autorestore::log($thelog, get_string('movedbackup', 'tool_autorestore'));
                     } else {
                         tool_autorestore::log($thelog, get_string('failedmovedbackup', 'tool_autorestore'));
