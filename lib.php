@@ -566,7 +566,7 @@ class tool_autorestore {
             }
 
             $timeelapsed = time() - $starttime;
-            tool_autorestore::log(get_string($thelog, 'processcompleted', 'tool_autorestore', $timeelapsed));
+            tool_autorestore::log($thelog, get_string('processcompleted', 'tool_autorestore', $timeelapsed));
 
             // Close the log.
             fclose($thelog);
