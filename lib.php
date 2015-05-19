@@ -214,10 +214,6 @@ class tool_autorestore {
 
         // Backup file path.
         $thebackup = $path . '/' . $backupfile;
-        
-        // Check.
-        check_dir_exists($CFG->dataroot . '/temp/backup');
-
 
         // Check if folder exists.
         if ( file_exists($CFG->dataroot . '/temp/backup/'.$extractdir) ) {
@@ -427,7 +423,7 @@ class tool_autorestore {
         require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
         // Get configs
-        $backupsdir         = get_config('tool_autorestore','from'); // Get backups path.
+        $backupsdir = get_config('tool_autorestore','from'); // Get backups path.
 
         if ( empty($backupsdir) ) {
             $backupsdir = $CFG->dataroot . '/backups';
@@ -436,7 +432,7 @@ class tool_autorestore {
         // Check.
         tool_autorestore::check_dir($backupsdir);
 
-        $successdir         = get_config('tool_autorestore','destination'); // Move succeded restored backups to this path.
+        $successdir = get_config('tool_autorestore','destination'); // Move succeded restored backups to this path.
 
         if ( empty($successdir) ) {
             $successdir = $CFG->dataroot . '/restored';
@@ -455,6 +451,9 @@ class tool_autorestore {
         if ( file_exists($logtolocation) && !is_file($logtolocation)) {
             throw new moodle_exception(get_string('logisnotfile', 'tool_autorestore', $logtolocation));
         }
+
+        // Check if the temporary backups dir exists.
+        check_dir_exists($CFG->dataroot . '/temp/backup');
 
         $mailadmins         = get_config('tool_autorestore','mailadmins'); // Send email to admins.
         $mailsubject        = get_config('tool_autorestore','mailsubject'); // The subject of mail.
