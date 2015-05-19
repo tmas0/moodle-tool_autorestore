@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @author     Toni Mas, Ricardo Díaz
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class autorestore_task extends \core\task\scheduled_task {
+class cron_task extends \core\task\scheduled_task {
 
     /**
      * Get a descriptive name for this task (shown to admins).
@@ -54,6 +54,6 @@ class autorestore_task extends \core\task\scheduled_task {
         require_once($CFG->dirroot . '/admin/tool/autorestore/lib.php');
         
         // Execute task.
-        tool_autorestore::execute();
+        autorestore_cron();
     }
 }
