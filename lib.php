@@ -69,7 +69,7 @@ class admin_setting_special_autorestoredays extends admin_setting_configmultiche
 *
 */
 
-function cron() {
+function autorestore_cron() {
 
     //Start the restore process for the mbz files
     tool_autorestore::execute();
