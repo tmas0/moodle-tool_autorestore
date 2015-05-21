@@ -576,7 +576,14 @@ class tool_autorestore {
             if ( $mailadmins ) {
                 tool_autorestore::send_email($logtolocation, $timeelapsed);
             }
+
+            set_config('running', false,'tool_autorestore');
+
+        } else {
+            mtrace("Autorestore are already running.");
+            tool_autorestore::log($thelog, $separator);
+            tool_autorestore::log($thelog, userdate(time()).' - '.gethostname().' - Autorestore are already running.');
+            tool_autorestore::log($thelog, $separator);
         }
-        set_config('running', false,'tool_autorestore');
     }
 }
