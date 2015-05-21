@@ -576,7 +576,8 @@ class tool_autorestore {
             if ( $mailadmins ) {
                 tool_autorestore::send_email($logtolocation, $timeelapsed);
             }
-
+            
+            mtrace("Process has completed. Time taken: $timeelapsed seconds.");
             set_config('running', false,'tool_autorestore');
 
         } else {
