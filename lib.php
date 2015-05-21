@@ -466,6 +466,8 @@ class tool_autorestore {
         // Can be execute.
         if ( $running == false ) {
             
+            set_config('running', true,'tool_autorestore');
+            
             // Get current time.
             $starttime = time();
 
@@ -575,5 +577,6 @@ class tool_autorestore {
                 tool_autorestore::send_email($logtolocation, $timeelapsed);
             }
         }
+        set_config('running', false,'tool_autorestore');
     }
 }
