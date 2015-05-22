@@ -198,7 +198,8 @@ class tool_autorestore {
                         $backupfiles[] = $file;
                     }
                 }
-            } if(sizeof($backupfiles) == 0) {
+            }
+            if(sizeof($backupfiles) == 0) {
                 mtrace("Backup directory ($backupdir) is empty!.");
             }
         } else {
@@ -453,12 +454,13 @@ class tool_autorestore {
         tool_autorestore::check_dir($successdir);
 
         $logtolocation = get_config('tool_autorestore','logtolocation'); // path.
-        $logtolocation = $logtolocation.'/tool_autorestore.log'; //path and default filename
 
         // If not defined, set the default value.
         if ( empty($logtolocation) ) {
-            $logtolocation = $CFG->dataroot . '/backups/tool_autorestore.log';
+            $logtolocation = $CFG->dataroot . '/backups';
         }
+        $logtolocation = $logtolocation.'/tool_autorestore.log'; //path and default filename
+
 
         if ( file_exists($logtolocation) && !is_file($logtolocation)) {
             throw new moodle_exception(get_string('logisnotfile', 'tool_autorestore', $logtolocation));
