@@ -198,6 +198,8 @@ class tool_autorestore {
                         $backupfiles[] = $file;
                     }
                 }
+            } if(sizeof($backupfiles) == 0) {
+                mtrace("Backup directory ($backupdir) is empty!.");
             }
         } else {
             throw new coding_exception(get_string('invalidbackupdir', 'tool_autorestore'), $backupdir);
