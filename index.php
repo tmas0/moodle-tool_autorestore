@@ -88,7 +88,7 @@ if ( $enabled == 0 ) {
 	echo $renderer->heading( get_string('filespending', 'tool_autorestore'), 3 );
 	$backupsdir = get_config('tool_autorestore', 'from');
 	if ( $backupsdir && is_dir($backupsdir) ) {
-		if ( $files = array_diff(scandir($backupsdir), array('..', '.')) ) {
+		if ( $files = array_diff(scandir($backupsdir), array('..', '.', 'tool_autorestore.log')) ) {
 			echo $renderer->files_pending($files);
 		} else {
 			echo $renderer->box(get_string('emptydirbackup', 'tool_autorestore'));          
