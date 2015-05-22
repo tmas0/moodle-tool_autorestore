@@ -77,7 +77,7 @@ if ( $enabled == 0 ) {
 	echo $renderer->heading( get_string('filesrestored', 'tool_autorestore'), 3 );
 	$restoreddir = get_config('tool_autorestore', 'destination');
 	if ( $restoreddir && is_dir($restoreddir) ) {
-		if ( $files = array_diff(scandir($restoreddir), array('..', '.')) ) {
+		if ( $files = array_diff(scandir($restoreddir), array('..', '.', 'tool_autorestore.log')) ) {
 			echo $renderer->files_restored($files);
 		} else {
 			echo $renderer->box(get_string('emptydirrestored', 'tool_autorestore'));          
