@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 $string['active'] = 'Active';
 $string['aftersaving'] = 'Once you have saved your settings, you may wish to';
-$string['autoactivedescription'] = 'Choose whether or not to do automated restores. If manual is selected automated restores will be possible only by through the automated restore CLI script. This can be done either manually on the command line or through cron.';
+$string['autoactivedescription'] = 'Choose whether or not to do automated restores. If enabled is selected you can specify when you want to run using scheduled tasks. If manual is selected automated restores will be possible only by through the automated restore CLI script. This can be done either manually on the command line or through cron.';
 $string['autoactivedisabled'] = 'Disabled';
 $string['autoactiveenabled'] = 'Enabled';
 $string['autoactivemanual'] = 'Manual';
