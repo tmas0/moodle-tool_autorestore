@@ -67,21 +67,22 @@ class admin_setting_special_autorestoredays extends admin_setting_configmultiche
 /**************************
 * CRON Autorestore plugin.
 *
+* active=0 Disable
+* active=1 Enable
+* active=2 Manual (Only CLI execution)
 */
 
 function autorestore_cron() {
 
     $active = get_config('tool_autorestore','active');
 
-    if ($active == '0') {
-        mtrace("Autorestore is disabled.");
-    }
     if ($active == '1') {
         //Start the restore process for the mbz files
         tool_autorestore::execute();
-    }
-    if ($active == '2') {
+    } elseif ($active == '2') {
         mtrace("Autorestore is configured to Manual. Only cli execution is permitted");
+    } else {
+        mtrace("Autorestore is disabled.");
     }
 }
 
