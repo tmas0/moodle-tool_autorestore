@@ -52,18 +52,6 @@ if ($hassiteconfig) {
 	    		)
     		);
 
-    // Execution days.
-    $temp->add(new admin_setting_special_autorestoredays());
-
-    // Execution hour and minute.
-    $temp->add( new admin_setting_configtime('tool_autorestore/auto_hour', 
-	    			'auto_minute', 
-	    			new lang_string('executeat', 'tool_autorestore'),
-	                new lang_string('autorestoreexecuteathelp', 'tool_autorestore'), 
-	                array('h' => 0, 'm' => 0)
-	            )
-    		);
-
     // Directory of the backups.
     $temp->add( new admin_setting_configdirectory('tool_autorestore/from', 
     				new lang_string('restorefrom', 'tool_autorestore'), 
@@ -84,7 +72,7 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configfile('tool_autorestore/logtolocation', 
     				new lang_string('logtolocation', 'tool_autorestore'), 
     				'', 
-    				$CFG->dataroot . '/backups/tool_autorestore.log'
+    				$CFG->dataroot . '/backups'
     			)
     		);
 
