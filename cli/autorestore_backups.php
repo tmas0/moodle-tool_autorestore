@@ -77,3 +77,5 @@ if ($active == '2') {
 } else {
     mtrace("Autorestore is disabled.");
 }
+
+exit(0); // 0 means success
