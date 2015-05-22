@@ -450,7 +450,8 @@ class tool_autorestore {
         // Check.
         tool_autorestore::check_dir($successdir);
 
-        $logtolocation      = get_config('tool_autorestore','logtolocation'); // The log.
+        $logtolocation = get_config('tool_autorestore','logtolocation'); // path.
+        $logtolocation = $logtolocation.'/tool_autorestore.log'; //path and default filename
 
         // If not defined, set the default value.
         if ( empty($logtolocation) ) {
