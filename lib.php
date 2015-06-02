@@ -25,6 +25,8 @@
  defined('MOODLE_INTERNAL') || die();
  
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
 /**
  * Define list of week days who your choose to execute the autorestore.
@@ -60,6 +62,193 @@ class admin_setting_special_autorestoredays extends admin_setting_configmultiche
             $this->choices[$day] = get_string($day, 'calendar');
         }
         return true;
+    }
+}
+
+/**
+ * Progress class that records the result of restore_controller::is_executing calls.
+ *
+ * @package core_backup
+ * @copyright 2014 The Open University
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class core_backup_progress_autorestore_is_executing extends \core\progress\base {
+    /** @var array Array of results from calling function */
+    public $executing = array();
+
+    public function update_progress() {
+        $this->executing[] = restore_controller::is_executing();
+    }
+}
+
+/**
+ * Unzip moodle backup with progress bar.
+ *
+ */
+class autorestore_unzip implements file_progress {
+
+    /**
+     * @var \core\progress\base Optional progress reporter
+     */
+    private $progressreporter;
+
+    protected $restorepath = null;
+    protected $backupfile = null;
+    protected $restoredir = null;
+
+    protected $logfile;
+
+    /**
+     * @var bool True if we have started reporting progress
+     */
+    protected $startedprogress = false;
+
+    /**
+     * Contructor.
+     *
+     * @param string $path Path to backups.
+     * @param string $backupfile The backup file.
+     * @param string $thelog The log file.
+     * @return string Name of unzip directory.
+     */
+    public function __construct($path, $backupfile, $thelog) {
+        global $CFG;
+
+        // Create dirname from backup file name hash.
+        $this->restoredir = sha1($backupfile);
+
+        $this->restorepath = $CFG->dataroot . '/temp/backup/' . $this->restoredir;
+
+        // Backup file path.
+        $this->backupfile = $path . '/' . $backupfile;;
+        $this->logfile = $thelog;
+    }
+
+    public function get_restoredir() {
+        return $this->restoredir;
+    }
+
+    public function process() {
+        global $CFG;
+
+        // Check if folder exists.
+        if ( file_exists($this->restorepath) ) {
+            if ( ! remove_dir($this->restorepath) ) {
+                throw new moodle_exception( get_string('removedirfailed', 
+                                                        'tool_autorestore', 
+                                                        $this->restorepath)
+                                            );
+                
+            }
+        }
+
+        tool_autorestore::log($this->logfile, 
+            get_string('filesizeproblems', 'tool_autorestore', tool_autorestore::get_filesize($this->backupfile))
+        );
+
+        // Extract backup file.
+        $outcome = $this->extract_file_to_dir();
+        
+        return $outcome;
+    }
+
+    /**
+     * Extracts the backup file.
+     */
+    protected function extract_file_to_dir() {
+        global $CFG;
+
+        $fb = get_file_packer('application/vnd.moodle.backup');
+        
+        $result = $fb->extract_to_pathname($this->backupfile,
+                $this->restorepath . '/', null, $this);
+
+        // If any progress happened, end it.
+        if ($this->startedprogress) {
+            $this->get_progress_reporter()->end_progress();
+        }
+        return $result;
+    }
+
+    /**
+     * Implementation for file_progress interface to display unzip progress.
+     *
+     * @param int $progress Current progress
+     * @param int $max Max value
+     */
+    public function progress($progress = file_progress::INDETERMINATE, $max = file_progress::INDETERMINATE) {
+        $reporter = $this->get_progress_reporter();
+
+        // Start tracking progress if necessary.
+        if (!$this->startedprogress) {
+            $reporter->start_progress('extract_file_to_dir',
+                    ($max == file_progress::INDETERMINATE) ? \core\progress\base::INDETERMINATE : $max);
+            $this->startedprogress = true;
+        }
+
+        // Pass progress through to whatever handles it.
+        $reporter->progress(
+                ($progress == file_progress::INDETERMINATE) ? \core\progress\base::INDETERMINATE : $progress);
+    }
+
+    /**
+     * Gets the progress reporter object in use for this restore UI stage.
+     *
+     * IMPORTANT: This progress reporter is used only for UI progress that is
+     * outside the restore controller. The restore controller has its own
+     * progress reporter which is used for progress during the main restore.
+     * Use the restore controller's progress reporter to report progress during
+     * a restore operation, not this one.
+     *
+     * This extra reporter is necessary because on some restore UI screens,
+     * there are long-running tasks even though there is no restore controller
+     * in use. There is a similar function in restore_ui. but that class is not
+     * used on some stages.
+     *
+     * @return \core\progress\null
+     */
+    public function get_progress_reporter() {
+        if (!$this->progressreporter) {
+            $this->progressreporter = new \core\progress\null();
+        }
+        return $this->progressreporter;
+    }
+
+    /**
+     * Sets the progress reporter that will be returned by get_progress_reporter.
+     *
+     * @param \core\progress\base $progressreporter Progress reporter
+     */
+    public function set_progress_reporter(\core\progress\base $progressreporter) {
+        $this->progressreporter = $progressreporter;
+    }
+
+    /**
+     * Gets an array of progress bar items that can be displayed through the restore renderer.
+     * @return array Array of items for the progress bar
+     */
+    public function get_progress_bar() {
+        global $PAGE;
+        $stage = restore_ui::STAGE_COMPLETE;
+        $currentstage = $this->get_stage();
+        $items = array();
+        while ($stage > 0) {
+            $classes = array('backup_stage');
+            if (floor($stage/2) == $currentstage) {
+                $classes[] = 'backup_stage_next';
+            } else if ($stage == $currentstage) {
+                $classes[] = 'backup_stage_current';
+            } else if ($stage < $currentstage) {
+                $classes[] = 'backup_stage_complete';
+            }
+            $item = array('text' => strlen(decbin($stage)).'. '.get_string('restorestage'.$stage, 'backup'),'class' => join(' ', $classes));
+            if ($stage < $currentstage && $currentstage < restore_ui::STAGE_COMPLETE) {
+                //$item['link'] = new moodle_url($PAGE->url, array('restore'=>$this->get_restoreid(), 'stage'=>$stage));
+            }
+            array_unshift($items, $item);
+            $stage = floor($stage/2);
+        }
+        return $items;
     }
 }
 
@@ -217,35 +406,23 @@ class tool_autorestore {
      * @return string Name of unzip directory.
      */
     public static function unzip_moodle_backup($path, $backupfile, $thelog) {
-        global $CFG;
 
-        require_once($CFG->dirroot . '/lib/filestorage/mbz_packer.php');
+        require_once(__DIR__. '/classes/progress/cmd.php');
 
-        // Create dirname from backup file name hash.
-        $extractdir = sha1($backupfile);
+        $slowprogress = new \core\progress\cmd();
+        $slowprogress->start_progress('', 10);
+        $slowprogress->start_progress('', 1, 9);
 
-        // Backup file path.
-        $thebackup = $path . '/' . $backupfile;
+        $unpacker = new autorestore_unzip($path, $backupfile, $thelog);
 
-        // Check if folder exists.
-        if ( file_exists($CFG->dataroot . '/temp/backup/'.$extractdir) ) {
-            if ( ! remove_dir($CFG->dataroot . '/temp/backup/'.$extractdir) ) {
-                throw new moodle_exception( get_string('removedirfailed', 
-                                                        'tool_autorestore', 
-                                                        $CFG->dataroot . '/temp/backup/'.$extractdir)
-                                            );
-                
-            }
-        }
+        $unpacker->set_progress_reporter($slowprogress);
 
-        $nmuext = new mbz_packer();
+        $unpacker->process();
 
-        tool_autorestore::log($thelog, get_string('filesizeproblems', 'tool_autorestore', tool_autorestore::get_filesize($thebackup)));
+        $slowprogress->end_progress();
+        $slowprogress->end_progress();
 
-        // Extract backup file.
-        $nmuext->extract_to_pathname($thebackup, $CFG->dataroot . '/temp/backup/' . $extractdir);
-        
-        return $extractdir;
+        return $unpacker->get_restoredir();
     }
 
     /**
@@ -263,7 +440,7 @@ class tool_autorestore {
         if ( empty($categoryname) ) {
             tool_autorestore::log($thelog, get_string('invalidcategoryname', 'tool_autorestore', $categoryname));
             // Return default category.
-            $default = ccoursecat::get_default();
+            $default = coursecat::get_default();
             return $default->id;
         }
 
@@ -476,11 +653,11 @@ class tool_autorestore {
 
         // The log file.
         $thelog = fopen($logtolocation, 'a');
-        
+      
         // Can be execute.
-        if ( $running == false ) {
+        if ( !$running ) {
             
-            set_config('running', true,'tool_autorestore');
+            set_config('running', true, 'tool_autorestore');
             
             // Get current time.
             $starttime = time();
@@ -513,6 +690,7 @@ class tool_autorestore {
                     } catch (Exception $e) {
                         tool_autorestore::log($thelog, get_string('failcreatenewcourse', 'tool_autorestore', $e->getMessage()));
                         tool_autorestore::save_error($backupfile, $e->getMessage());
+                        set_config('running', false, 'tool_autorestore');
                         // Goto next course backup.
                         continue;
                     }
@@ -543,6 +721,7 @@ class tool_autorestore {
                     } catch (Exception $e) {
                         tool_autorestore::log($thelog, 'failprecheck', 'tool_autorestore', $e->getMessage());
                         tool_autorestore::save_error($backupfile, $e->getMessage());
+                        set_config('running', false, 'tool_autorestore');
                         continue;
                     }
 
@@ -554,6 +733,7 @@ class tool_autorestore {
                     } catch (Exception $e) {
                         tool_autorestore::log($thelog, get_string('failedexecuterestore', 'tool_autorestore', $e->getMessage()));
                         tool_autorestore::save_error($backupfile, $e->getMessage());
+                        set_config('running', false, 'tool_autorestore');
                         continue;
                     }
                     
@@ -592,7 +772,7 @@ class tool_autorestore {
             }
             
             mtrace("Process has completed. Time taken: $timeelapsed seconds.");
-            set_config('running', false,'tool_autorestore');
+            set_config('running', false, 'tool_autorestore');
 
         } else {
             mtrace("Autorestore are already running.");
