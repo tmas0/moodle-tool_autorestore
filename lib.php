@@ -411,7 +411,6 @@ class tool_autorestore {
 
         $slowprogress = new \core\progress\cmd();
         $slowprogress->start_progress('', 10);
-        $slowprogress->start_progress('', 1, 9);
 
         $unpacker = new autorestore_unzip($path, $backupfile, $thelog);
 
@@ -419,7 +418,6 @@ class tool_autorestore {
 
         $unpacker->process();
 
-        $slowprogress->end_progress();
         $slowprogress->end_progress();
 
         return $unpacker->get_restoredir();

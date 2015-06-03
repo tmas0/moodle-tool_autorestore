@@ -80,7 +80,7 @@ class cmd extends base {
             throw new \coding_exception('Already started');
         }
         $this->bar = new \text_progress_trace();
-        echo 0;
+        echo '.';
     }
 
     /**
@@ -91,7 +91,7 @@ class cmd extends base {
      */
     public function end_html() {
         // Finish progress bar.
-        $this->bar->output('', 100);
+        $this->bar->output('');
         $this->bar = null;
 
         // End wibbler div.
@@ -106,6 +106,7 @@ class cmd extends base {
     public function update_progress() {
         global $DB;
 
+        // This used for prevent connection timeout on unzip bigger moodle compressed backups.
         $DB->get_records_sql('SELECT 1');
 
         // If finished...
@@ -121,7 +122,7 @@ class cmd extends base {
             // (up to once per second).
             if (time() != $this->lastwibble) {
                 $this->lastwibble = time();
-                echo $this->currentstate;
+                echo '.';
 
                 // Go on to next colour.
                 $this->currentstate += $this->direction;
@@ -139,7 +140,7 @@ class cmd extends base {
             if ($this->displaynames) {
                 $message = $this->get_current_description();
             }
-            $this->bar->output($message, $min * 100);
+            $this->bar->output($message);
 
             // Flush output.
             flush();
