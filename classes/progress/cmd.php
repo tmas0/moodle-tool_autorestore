@@ -93,9 +93,6 @@ class cmd extends base {
         // Finish progress bar.
         $this->bar->output('');
         $this->bar = null;
-
-        // End wibbler div.
-        //echo \html_writer::end_div();
     }
 
     /**

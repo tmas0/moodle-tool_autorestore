@@ -27,5 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version   	= 2015050500;        // The current plugin version.
 $plugin->requires  	= 2014051200;        // Requires this Moodle version.
 $plugin->cron 		= 0;
-$plugin->release 	= 'Version 1.0';
+$plugin->release 	= '1.0';
 $plugin->component 	= 'tool_autorestore'; // Full name of the plugin (used for diagnostics).
+$plugin->maturity   = MATURITY_STABLE;

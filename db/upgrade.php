@@ -37,7 +37,7 @@ function xmldb_tool_autorestore_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2015050500) {
-    	// Define table tool_autorestore_error to be created.
+        // Define table tool_autorestore_error to be created.
         $table = new xmldb_table('tool_autorestore_error');
 
         // Adding fields to table tool_autorestore_error.

@@ -62,20 +62,21 @@ echo "Moodle automatic restoring backup courses running ...\n";
 // Emulate normal session.
 cron_setup_user();
 
-$active = get_config('tool_autorestore','active');
-/*
-* active=2 Manual (Only CLI execution)
-* active=1 Enable (cron execution)
-* active=0 Disable
-*/
+$active = get_config('tool_autorestore', 'active');
+
+//
+// active=2 Manual (Only CLI execution)
+// active=1 Enable (cron execution)
+// active=0 Disable
+//
 
 if ($active == '2') {
-    //Start the restore process for the mbz files
+    // Start the restore process for the mbz files
     tool_autorestore::execute();
-} elseif ($active == '1') {
+} else if ($active == '1') {
     mtrace("Autorestore is not configured to Manual.");
 } else {
     mtrace("Autorestore is disabled.");
 }
 
-exit(0); // 0 means success
+exit(0); // 0 means success.

@@ -17,12 +17,12 @@
 /**
  * Index page for automatic restore tool.
  *
- * @package		tool_autorestore
- * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat
- * @author     	Toni Mas, Ricardo Díaz
- * @license   	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     tool_autorestore
+ * @copyright   2015 Universitat de les Illes Balears http://www.uib.cat
+ * @author      Toni Mas, Ricardo Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
@@ -39,7 +39,6 @@ require_capability('tool/autorestore:view', $context);
 
 $strplugin = get_string('pluginname', 'tool_autorestore');
 $title = format_string($SITE->fullname) . ': '. $strplugin;
-
 
 $PAGE->set_context($context);
 
@@ -60,39 +59,39 @@ echo $renderer->heading($strplugin);
 $enabled = get_config('tool_autorestore', 'active');
 
 if ( $enabled == 0 ) {
-	echo $renderer->box(get_string('disabled', 'tool_autorestore'));
+    echo $renderer->box(get_string('disabled', 'tool_autorestore'));
 } else {
 
-	// List of backups with restore errors.
-	echo $renderer->heading( get_string('backupwitherrors', 'tool_autorestore'), 3 );
+    // List of backups with restore errors.
+    echo $renderer->heading( get_string('backupwitherrors', 'tool_autorestore'), 3 );
 
-	if ( $errors = tool_autorestore::get_errors() ) {
-		echo $renderer->print_errors($errors);
-	} else {
-		echo $renderer->box(get_string('nobackupswitherrors', 'tool_autorestore'));
-	}
+    if ( $errors = tool_autorestore::get_errors() ) {
+        echo $renderer->print_errors($errors);
+    } else {
+        echo $renderer->box(get_string('nobackupswitherrors', 'tool_autorestore'));
+    }
 
-	// List of restored backups.
-	echo $renderer->heading( get_string('filesrestored', 'tool_autorestore'), 3 );
-	$restoreddir = get_config('tool_autorestore', 'destination');
-	if ( $restoreddir && is_dir($restoreddir) ) {
-		if ( $files = array_diff(scandir($restoreddir), array('..', '.', 'tool_autorestore.log')) ) {
-			echo $renderer->files_restored($files);
-		} else {
-			echo $renderer->box(get_string('emptydirrestored', 'tool_autorestore'));          
-		}
-	}
+    // List of restored backups.
+    echo $renderer->heading( get_string('filesrestored', 'tool_autorestore'), 3 );
+    $restoreddir = get_config('tool_autorestore', 'destination');
+    if ( $restoreddir && is_dir($restoreddir) ) {
+        if ( $files = array_diff(scandir($restoreddir), array('..', '.', 'tool_autorestore.log')) ) {
+            echo $renderer->files_restored($files);
+        } else {
+            echo $renderer->box(get_string('emptydirrestored', 'tool_autorestore'));          
+        }
+    }
 
-	// List of pending backups.
-	echo $renderer->heading( get_string('filespending', 'tool_autorestore'), 3 );
-	$backupsdir = get_config('tool_autorestore', 'from');
-	if ( $backupsdir && is_dir($backupsdir) ) {
-		if ( $files = array_diff(scandir($backupsdir), array('..', '.', 'tool_autorestore.log')) ) {
-			echo $renderer->files_pending($files);
-		} else {
-			echo $renderer->box(get_string('emptydirbackup', 'tool_autorestore'));          
-		}
-	}
+    // List of pending backups.
+    echo $renderer->heading( get_string('filespending', 'tool_autorestore'), 3 );
+    $backupsdir = get_config('tool_autorestore', 'from');
+    if ( $backupsdir && is_dir($backupsdir) ) {
+        if ( $files = array_diff(scandir($backupsdir), array('..', '.', 'tool_autorestore.log')) ) {
+            echo $renderer->files_pending($files);
+        } else {
+            echo $renderer->box(get_string('emptydirbackup', 'tool_autorestore'));          
+        }
+    }
 }
 
 echo $renderer->footer();

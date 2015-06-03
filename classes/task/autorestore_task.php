@@ -50,9 +50,9 @@ class autorestore_task extends \core\task\scheduled_task {
      */
     public function execute() {
         global $CFG;
-        
+
         require_once($CFG->dirroot . '/admin/tool/autorestore/lib.php');
-        
+
         // Execute task.
         autorestore_cron();
     }
