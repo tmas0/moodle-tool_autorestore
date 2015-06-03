@@ -25,7 +25,6 @@
  
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once('restore_form.php');
 
 // Security hack.
 require_login();
