@@ -146,7 +146,7 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_calendarevents',
                     new lang_string('settingcalendarevents','tool_autorestore'),
                     new lang_string('configincludecalendarevents','tool_autorestore'),
-                    '1'
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_userscompletion',
