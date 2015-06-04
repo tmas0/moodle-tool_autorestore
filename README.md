@@ -25,4 +25,4 @@ Its use is simple:
 * If it executed by task, just wait for it to run.
 * If you run for cli, goes to the environment and run it. (php admin/tool/autorestore/cli/autorestore_backups.php)
 
-Like it!
+Enjoy it!
