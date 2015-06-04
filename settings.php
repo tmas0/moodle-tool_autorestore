@@ -80,8 +80,7 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/mailadmins',
                     new lang_string('mailadmins', 'tool_autorestore'),
                     '',
-                    0
-                )
+                    '0')
             );
     
     // Choose select email.
@@ -99,85 +98,73 @@ if ($hassiteconfig) {
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_users',
                     new lang_string('settingincludeusers','tool_autorestore'),
                     new lang_string('configincludeusers','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_enrol_manual',
                     new lang_string('settingenrolmanual','tool_autorestore'),
                     new lang_string('configincludenrolmanual','tool_autorestore'),
-                    array('value' => 0, 'locked' => 0)
-                )
+                    '0')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_role_assignments',
                     new lang_string('settingroleassignments','tool_autorestore'),
                     new lang_string('configincluderoleassignments','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_activities',
                     new lang_string('settingactivities','tool_autorestore'),
                     new lang_string('configincludeactivities','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_blocks',
                     new lang_string('settingblocks','tool_autorestore'),
                     new lang_string('configincludeblocks','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_filters',
                     new lang_string('settingfilters','tool_autorestore'),
                     new lang_string('configincludefilters','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_comments',
                     new lang_string('settingcomments','tool_autorestore'),
                     new lang_string('configincludecomments','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_badges',
                     new lang_string('settingbadges','tool_autorestore'),
                     new lang_string('configincludebadges','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_calendarevents',
                     new lang_string('settingcalendarevents','tool_autorestore'),
                     new lang_string('configincludecalendarevents','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1'
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_userscompletion',
                     new lang_string('settinguserscompletion','tool_autorestore'),
                     new lang_string('configincludeuserscompletion','tool_autorestore'),
-                    array('value' => 1, 'locked' => 0)
-                )
+                    '1')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_logs',
                     new lang_string('settinglogs','tool_autorestore'),
                     new lang_string('configincludelogs','tool_autorestore'),
-                    array('value' => 0, 'locked' => 0)
-                )
+                    '0')
             );
 
     $temp->add( new admin_setting_configcheckbox('tool_autorestore/autorestore_include_histories',
                     new lang_string('settinggradehistories','tool_autorestore'),
                     new lang_string('configincludehistories','tool_autorestore'),
-                    array('value' => 0, 'locked' => 0)
-                )
+                    '0')
             );
 
     $ADMIN->add('restores', $temp);
