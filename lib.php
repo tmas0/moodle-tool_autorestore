@@ -250,14 +250,11 @@ class autorestore_unzip implements file_progress {
 }
 
 
-/**************************
-* CRON Autorestore plugin.
-*
-* active=0 Disable
-* active=1 Enable
-* active=2 Manual (Only CLI execution)
-*/
 
+/**
+ * Execute autorestore tool by cron.
+ *
+ */
 function autorestore_cron() {
 
     $active = get_config('tool_autorestore','active');

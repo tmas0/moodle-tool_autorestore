@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Version of plugin.
  *
  * @package		tool_autorestore
  * @copyright  	2015 Universitat de les Illes Balears http://www.uib.cat

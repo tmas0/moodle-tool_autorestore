@@ -23,9 +23,9 @@ defined('MOODLE_INTERNAL') || die();
  * progress. The Moodle progress bar cannot show indeterminate progress,
  * so we do extra output in addition to the bar.
  *
- * @package core_progress
- * @copyright 2013 The Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   autorestore_progress
+ * @copyright 2015 Universitat de les Illes Balears.
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cmd extends base {
     /**
@@ -38,7 +38,20 @@ class cmd extends base {
      */
     private $bar;
 
-    private $lastwibble, $currentstate = 0, $direction = 1;
+    /**
+     * @var string $lastwibble The last wibble.
+     */
+    private $lastwibble;
+
+    /**
+     * @var int $currentstate Current state.
+     */
+    private $currentstate = 0;
+
+    /**
+     * @var int $direction The direction.
+     */
+     private $direction = 1;
 
     /**
      * @var bool True to display names
@@ -53,7 +66,7 @@ class cmd extends base {
      */
     public function __construct($startnow = true) {
         if ($startnow) {
-            $this->start_html();
+            $this->start_text();
         }
     }
 
@@ -75,7 +88,7 @@ class cmd extends base {
      *
      * @throws \coding_exception If already started
      */
-    public function start_html() {
+    public function start_text() {
         if ($this->bar) {
             throw new \coding_exception('Already started');
         }
@@ -89,7 +102,7 @@ class cmd extends base {
      *
      * Automatically called from update_progress when progress finishes.
      */
-    public function end_html() {
+    public function end_text() {
         // Finish progress bar.
         $this->bar->output('');
         $this->bar = null;
@@ -109,11 +122,11 @@ class cmd extends base {
         // If finished...
         if (!$this->is_in_progress_section()) {
             if ($this->bar) {
-                $this->end_html();
+                $this->end_text();
             }
         } else {
             if (!$this->bar) {
-                $this->start_html();
+                $this->start_text();
             }
             // In case of indeterminate or small progress, update the wibbler
             // (up to once per second).
