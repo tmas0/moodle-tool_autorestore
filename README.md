@@ -12,19 +12,17 @@ It's a contribution of Center of Information Technologies at the University of B
 
 # Install
 The installation process is a typical in Moodle. As a management tool:
-
-## Download the file <moodle_path>/admin/tool/
-## Unzip the file.
-## Delete the .zip file.
-## Login with user which have a administrator privileges and you click in notifications link.
+* Download the file <moodle_path>/admin/tool/
+* Unzip the file.
+* Delete the .zip file.
+* Login with user which have a administrator privileges and you click in notifications link.
 
 # How to use
-Its use is simple.
-
-## In the Moodledata creates a directory for the backups. Copies the backups to be restored there.
-## In the Moodledata creates a directory for the process, once it has been restored successfully, the tool copy the backups restored there. For example 'restored' folder.
-## Login into Moodle, and goes to the autorestore configuration section. Specify what you want preferences.
-## If it executed by task, just wait for it to run.
-## If you run for cli, goes to the environment and run it. (php admin/tool/autorestore/cli/autorestore_backups.php)
+Its use is simple:
+* In the Moodledata creates a directory for the backups. Copies the backups to be restored there.
+* In the Moodledata creates a directory for the process, once it has been restored successfully, the tool copy the backups restored there. For example 'restored' folder.
+* Login into Moodle, and goes to the autorestore configuration section. Specify what you want preferences.
+* If it executed by task, just wait for it to run.
+* If you run for cli, goes to the environment and run it. (php admin/tool/autorestore/cli/autorestore_backups.php)
 
 Like it!
