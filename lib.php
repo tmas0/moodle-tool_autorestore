@@ -334,18 +334,14 @@ class tool_autorestore {
         $msg = get_string('autorestoreexecuted', 'tool_autorestore') . ".\n";
         $msg .= get_string('timetaken', 'tool_autorestore', $timeelapsed) . "\n\n";
 
-        if ( !empty(get_config('tool_autorestore', 'logtolocation')) ) {
-            if ( file_exists($logfile) ) {
-                $msg .= get_string('logwrittento', 'tool_autorestore') . "\n";
-                $msg .= $logfile . "\n";
-                $msg .= get_string('logsize', 'tool_autorestore', self::get_filesize($logfile) ) . "\n\n";
-            } else {
-                $msg .= get_string('lognowritten', 'tool_autorestore') . "\n";
-                $msg .= get_string('checkdirpermissions', 'tool_autorestore') . "\n";
-                $msg .= $logtolocation . "\n\n";
-            }
+        if ( file_exists($logfile) ) {
+            $msg .= get_string('logwrittento', 'tool_autorestore') . "\n";
+            $msg .= $logfile . "\n";
+            $msg .= get_string('logsize', 'tool_autorestore', self::get_filesize($logfile) ) . "\n\n";
         } else {
-            $msg .= get_string('loggingnotactive', 'tool_autorestore');
+            $msg .= get_string('lognowritten', 'tool_autorestore') . "\n";
+            $msg .= get_string('checkdirpermissions', 'tool_autorestore') . "\n";
+            $msg .= $logtolocation . "\n\n";
         }
 
         $eventdata = new stdClass();
