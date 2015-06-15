@@ -71,7 +71,7 @@ class tool_autorestore_renderer extends plugin_renderer_base {
                 $errorstable->add_data($data);
             }
 
-            $output .= html_writer::table($table);
+            $output .= html_writer::table($errorstable);
         }
 
         return $output;
