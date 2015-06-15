@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir . '/tablelib.php');
+
 /**
  * Renderer for the automatic restore tool.
  *
