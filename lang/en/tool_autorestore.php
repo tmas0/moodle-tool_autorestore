@@ -4,7 +4,7 @@
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// (at your option) any later version.e
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -66,7 +66,7 @@ $string['emptydirrestored'] = 'No Moodle backups restored.';
 $string['errordate'] = 'Execute date';
 $string['errortext'] = 'Error or problem';
 $string['executeat'] = 'Execute at';
-$string['executingrestore'] = 'Succeded precheck. Starting to restore';
+$string['executingrestore'] = 'Precheck succeeded. Starting to restore';
 $string['failcreatenewcourse'] = 'Cannot create course: {$a}';
 $string['failedcreatedir'] = 'Directory ({$a}) does not exist. Failed to create. You must check your path in MoodleData or permissions.';
 $string['failedexecuterestore'] = 'Restoring process failed with: {$a}';
@@ -107,7 +107,7 @@ $string['restored'] = 'Restored files location';
 $string['restoredcourses'] = 'Restored courses';
 $string['restorefrom'] = 'Get backups from';
 $string['restores'] = 'Auto restore tool';
-$string['restoresucceded'] = 'Succeded restore backup.';
+$string['restoresucceded'] = 'Restore backup succeeded.';
 $string['restoreto'] = 'Move restored courses to';
 $string['setautorestoreparameters'] = 'Set autorestore parameters';
 $string['settingactivities'] = 'Include activities and resources';
